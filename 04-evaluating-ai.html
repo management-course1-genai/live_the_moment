@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you know your AI is any good? — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);--navy:#2B2D42;--navy-dark:#1A1B2E;--bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;--text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;--border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E0524B;--blue:#4285F4;--radius:14px;--radius-sm:8px;--shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);--shadow-lg:0 16px 48px rgba(43,45,66,0.12)}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;background-image:radial-gradient(circle at 12% 15%,rgba(232,122,46,0.06),transparent 40%),radial-gradient(circle at 88% 85%,rgba(76,175,80,0.05),transparent 42%)}
+
+.brand-logo{position:fixed;top:18px;right:22px;z-index:60;display:flex;flex-direction:column;align-items:center;gap:.2rem;text-decoration:none}
+.brand-logo img{width:60px;height:auto;filter:drop-shadow(0 6px 20px rgba(232,122,46,0.22));animation:float 3.2s ease-in-out infinite}
+.brand-logo .bl-name{font-family:'DM Serif Display',serif;font-size:.78rem;color:var(--navy)}
+.brand-logo .bl-name em{font-style:normal;color:var(--orange)}
+
+.wrap{max-width:1080px;margin:0 auto;padding:2.2rem 1.5rem 3rem}
+.topline{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1rem;animation:fadeUp .6s ease}
+.topline .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+.def-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.12em;color:var(--green);background:var(--green-light);padding:.25rem .6rem;border-radius:5px;margin-left:.5rem;vertical-align:middle}
+h1.title{font-family:'DM Serif Display',serif;font-size:clamp(1.9rem,4.6vw,3rem);line-height:1.12;color:var(--navy);max-width:820px;margin-bottom:.7rem;animation:fadeUp .6s ease .08s both}
+h1.title em{font-style:normal;color:var(--orange)}
+.lede{font-size:1rem;color:var(--text-secondary);line-height:1.65;max-width:700px;margin-bottom:1.8rem;animation:fadeUp .6s ease .16s both}
+
+.player{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);overflow:hidden;animation:fadeUp .6s ease .24s both}
+.player-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.4rem;border-bottom:1px solid var(--border);background:var(--bg-light);flex-wrap:wrap}
+.step-meta{display:flex;align-items:center;gap:.7rem;min-width:0}
+.step-chip{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--orange);padding:.3rem .6rem;border-radius:6px;white-space:nowrap}
+.step-name{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);line-height:1.2}
+.dots{display:flex;gap:.4rem;flex-wrap:wrap}
+.dots button{width:10px;height:10px;border-radius:50%;border:none;background:var(--border);cursor:pointer;padding:0;transition:all .25s}
+.dots button.active{background:var(--orange);transform:scale(1.25)}
+.dots button.done{background:var(--orange-light)}
+.progress{height:4px;background:var(--border);position:relative;overflow:hidden}
+.progress-fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--orange),var(--green))}
+.progress-fill.run{transition:width 7.5s linear}
+
+.stage{position:relative;min-height:460px;display:flex;align-items:center;justify-content:center;padding:1.8rem 1.4rem}
+.scene{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:1.8rem 1.4rem;text-align:center}
+.scene.active{display:flex}
+.scene .art{width:100%;max-width:580px;height:250px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.scene .art svg{width:100%;height:100%;overflow:visible}
+.caption{font-size:1.02rem;color:var(--text-primary);line-height:1.5;max-width:660px;font-weight:500}
+.caption b{color:var(--orange)}
+.subcap{font-size:.85rem;color:var(--text-muted);line-height:1.5;max-width:620px;margin-top:.45rem}
+
+.controls{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.4rem;border-top:1px solid var(--border);background:var(--bg-light)}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:9px;font-size:.84rem;font-weight:600;font-family:inherit;border:1.5px solid var(--border);background:var(--bg-card);color:var(--text-primary);cursor:pointer;transition:all .2s}
+.btn:hover:not(:disabled){border-color:var(--orange);color:var(--orange);transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--orange);color:#fff;border-color:var(--orange)}
+.btn-primary:hover:not(:disabled){background:var(--orange-dark);color:#fff;box-shadow:0 4px 16px rgba(232,122,46,.3)}
+.btn svg{width:15px;height:15px}
+.play-toggle{display:inline-flex;align-items:center;gap:.45rem;font-size:.78rem;font-weight:600;color:var(--text-secondary);background:none;border:none;cursor:pointer;font-family:inherit}
+.play-toggle .pp{width:30px;height:30px;border-radius:50%;background:var(--orange-glow);color:var(--orange);display:flex;align-items:center;justify-content:center}
+.play-toggle svg{width:13px;height:13px}
+.foot{text-align:center;margin-top:1.6rem;font-size:.78rem;color:var(--text-muted)}
+.foot kbd{background:var(--bg-card);border:1px solid var(--border);border-radius:5px;padding:.1rem .4rem;font-size:.72rem;font-family:inherit;color:var(--text-secondary)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes popIn{0%{opacity:0;scale:.6}60%{scale:1.08}100%{opacity:1;scale:1}}
+@keyframes drawIn{from{opacity:0;translate:-30px 0}to{opacity:1;translate:0 0}}
+@keyframes slideR{from{opacity:0;translate:30px 0}to{opacity:1;translate:0 0}}
+@keyframes riseUp{from{opacity:0;translate:0 26px}to{opacity:1;translate:0 0}}
+@keyframes dropDown{from{opacity:0;translate:0 -26px}to{opacity:1;translate:0 0}}
+@keyframes dashFlow{from{opacity:1;stroke-dashoffset:220}to{opacity:1;stroke-dashoffset:0}}
+@keyframes glowPulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes sweep{0%{opacity:1;rotate:-78deg}100%{opacity:1;rotate:46deg}}
+@keyframes spin{to{rotate:360deg}}
+
+.scene .anim{opacity:0;transform-box:fill-box;transform-origin:center}
+.scene.active .cap-fade{animation:riseUp .6s ease .25s both}
+.scene.active .e-pop{animation:popIn .55s cubic-bezier(.34,1.56,.64,1) both}
+.scene.active .e-left{animation:drawIn .55s ease both}
+.scene.active .e-right{animation:slideR .55s ease both}
+.scene.active .e-rise{animation:riseUp .55s ease both}
+.scene.active .e-drop{animation:dropDown .55s ease both}
+.scene.active .e-dash{stroke-dasharray:220;stroke-dashoffset:220;animation:dashFlow 1s ease forwards}
+.scene.active .e-glow{animation:glowPulse 1.8s ease-in-out infinite}
+.scene.active .e-blink{animation:blink 1.1s steps(1) infinite}
+.scene.active .e-sweep{transform-origin:center bottom;animation:sweep 1.4s cubic-bezier(.5,0,.2,1) .4s both}
+.scene.active .e-spin{transform-origin:center;animation:spin 9s linear infinite}
+.d1{animation-delay:.15s!important}.d2{animation-delay:.32s!important}.d3{animation-delay:.5s!important}.d4{animation-delay:.7s!important}.d5{animation-delay:.9s!important}.d6{animation-delay:1.1s!important}.d7{animation-delay:1.35s!important}.d8{animation-delay:1.6s!important}
+
+@media(max-width:600px){
+.brand-logo img{width:46px}.brand-logo .bl-name{display:none}
+.stage{min-height:430px}.scene .art{height:206px}
+.step-name{font-size:.92rem}.caption{font-size:.94rem}.controls{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<a class="brand-logo" href="#"><img src="hero.svg" alt="MokshPath"><span class="bl-name">Moksh<em>Path</em></span></a>
+
+<div class="wrap">
+  <div class="topline"><span class="dot"></span> Evaluation · This week</div>
+  <h1 class="title">How do you know your AI is <em>any good</em>?</h1>
+  <p class="lede">Not "does it look nice when I try it once" — but "what is its measurable performance against the criteria that matter?" This walkthrough builds the habit one step at a time. Tap Next, or hit Auto-play.</p>
+
+  <div class="player">
+    <div class="player-top">
+      <div class="step-meta">
+        <span class="step-chip" id="chip">Step 1 / 9</span>
+        <span class="step-name" id="sceneName">The only question that matters</span>
+      </div>
+      <div class="dots" id="dots"></div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="pfill"></div></div>
+
+    <div class="stage" id="stage">
+
+      <!-- SCENE 0: dabbler vs serious adopter -->
+      <div class="scene active" data-name="The only question that matters">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- central question -->
+            <g class="anim e-pop d1" transform="translate(290,40)">
+              <rect x="-130" y="-22" width="260" height="46" rx="12" fill="var(--navy)"/>
+              <text x="0" y="6" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Is my AI actually good?</text>
+            </g>
+            <!-- branch lines -->
+            <path class="anim e-dash d2" d="M250 62 C190 100 150 110 130 140" fill="none" stroke="var(--text-muted)" stroke-width="2.4"/>
+            <path class="anim e-dash d2" d="M330 62 C400 100 430 110 450 140" fill="none" stroke="var(--orange)" stroke-width="2.4"/>
+            <!-- left: dabbler -->
+            <g class="anim e-left d3" transform="translate(130,190)">
+              <rect x="-110" y="-44" width="220" height="92" rx="14" fill="var(--bg-light)" stroke="var(--border)" stroke-width="1.6"/>
+              <text x="0" y="-22" text-anchor="middle" font-size="22">🙂👍</text>
+              <text x="0" y="2" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--text-secondary)">"It looked good</text>
+              <text x="0" y="18" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--text-secondary)">when I tried it once."</text>
+              <text x="0" y="38" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-muted)">the enthusiastic dabbler</text>
+            </g>
+            <!-- right: serious -->
+            <g class="anim e-right d4" transform="translate(450,190)">
+              <rect x="-110" y="-44" width="220" height="92" rx="14" fill="#fff" stroke="var(--orange)" stroke-width="2"/>
+              <g transform="translate(-72,-2)">
+                <rect x="0" y="-14" width="9" height="28" rx="2" fill="var(--orange-light)"/>
+                <rect x="14" y="-24" width="9" height="38" rx="2" fill="var(--orange)"/>
+                <rect x="28" y="-6" width="9" height="20" rx="2" fill="var(--green)"/>
+              </g>
+              <text x="14" y="-20" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--navy)">"Measured against</text>
+              <text x="14" y="-4" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--navy)">criteria that matter."</text>
+              <text x="0" y="38" text-anchor="middle" font-size="10" font-weight="700" fill="var(--orange)">the serious adopter</text>
+            </g>
+          </svg>
+        </div>
+        <p class="caption cap-fade">The simplest question separates the two: <b>how do you know the system is actually working?</b></p>
+        <p class="subcap cap-fade">One happy demo is a feeling. A measurement is an answer.</p>
+      </div>
+
+      <!-- SCENE 1: one demo is not evidence -->
+      <div class="scene" data-name="One demo is not evidence">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- hidden untested stack -->
+            <g class="anim e-rise d3" transform="translate(300,128)">
+              <rect x="-92" y="-66" width="190" height="120" rx="14" fill="var(--bg-light)" stroke="var(--border)" stroke-width="1.4"/>
+              <text x="3" y="-30" text-anchor="middle" font-size="34" fill="var(--text-muted)">?</text>
+            </g>
+            <g class="anim e-rise d2" transform="translate(286,122)">
+              <rect x="-92" y="-66" width="190" height="120" rx="14" fill="#fff" stroke="var(--border)" stroke-width="1.4"/>
+              <text x="3" y="-30" text-anchor="middle" font-size="34" fill="var(--text-muted)">?</text>
+            </g>
+            <!-- front: the one nice output -->
+            <g class="anim e-pop d4" transform="translate(270,116)">
+              <rect x="-100" y="-72" width="200" height="132" rx="16" fill="#fff" stroke="var(--green)" stroke-width="2.2"/>
+              <circle cx="0" cy="-34" r="20" fill="var(--green-light)"/>
+              <path d="M-9 -34 l6 7 12 -14" fill="none" stroke="var(--green)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="0" y="6" text-anchor="middle" font-size="12" font-weight="700" fill="var(--navy)">Looks great!</text>
+              <text x="0" y="26" text-anchor="middle" font-size="10.5" fill="var(--text-secondary)">(this single try)</text>
+              <text x="0" y="44" text-anchor="middle" font-size="10" fill="var(--text-muted)">1 of how many?</text>
+            </g>
+            <text class="anim e-rise d6" x="490" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-muted)">all the</text>
+            <text class="anim e-rise d6" x="490" y="96" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-muted)">outputs you</text>
+            <text class="anim e-rise d6" x="490" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-muted)">never checked</text>
+          </svg>
+        </div>
+        <p class="caption cap-fade">Behind one good demo sits a stack of outputs you <b>never tested</b>.</p>
+        <p class="subcap cap-fade">"It worked when I tried it" tells you about one try — not about the system.</p>
+      </div>
+
+      <!-- SCENE 2: magic trick -> tool -->
+      <div class="scene" data-name="Evaluation is the work">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- magic trick -->
+            <g class="anim e-left d2" transform="translate(135,125)">
+              <ellipse cx="0" cy="46" rx="74" ry="14" fill="var(--navy)" opacity="0.12"/>
+              <path d="M-46 40 q-2 -6 6 -8 h80 q8 2 6 8 z" fill="var(--navy)"/>
+              <rect x="-34" y="-30" width="68" height="74" rx="6" fill="var(--navy-dark)"/>
+              <rect x="-46" y="36" width="92" height="12" rx="4" fill="var(--navy)"/>
+              <text class="anim e-glow" x="44" y="-30" font-size="18">✨</text>
+              <text class="anim e-glow d2" x="-58" y="-12" font-size="15">✨</text>
+              <text class="anim e-glow d3" x="40" y="6" font-size="13">✨</text>
+              <text x="0" y="74" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-muted)">a magic trick</text>
+            </g>
+            <!-- arrow -->
+            <g class="anim e-pop d4" transform="translate(290,118)">
+              <path d="M-34 0 h60" stroke="var(--orange)" stroke-width="3" stroke-linecap="round"/>
+              <path d="M22 -7 l10 7 -10 7" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="0" y="-16" text-anchor="middle" font-size="10" font-weight="800" fill="var(--orange)">EVALUATION</text>
+            </g>
+            <!-- tool: gauge -->
+            <g class="anim e-right d5" transform="translate(450,135)">
+              <path d="M-58 12 A58 58 0 0 1 58 12" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>
+              <path d="M-58 12 A58 58 0 0 1 22 -52" fill="none" stroke="var(--green)" stroke-width="12" stroke-linecap="round"/>
+              <g class="anim e-sweep d5"><line x1="0" y1="12" x2="0" y2="-40" stroke="var(--navy)" stroke-width="4" stroke-linecap="round"/></g>
+              <circle cx="0" cy="12" r="7" fill="var(--navy)"/>
+              <text x="0" y="44" text-anchor="middle" font-size="11" font-weight="700" fill="var(--navy)">a measured tool</text>
+            </g>
+          </svg>
+        </div>
+        <p class="caption cap-fade">Evaluation turns AI from a <b>magic trick</b> into a tool you can rely on.</p>
+        <p class="subcap cap-fade">It feels like extra work on top of the build. It is not extra work — it is the work.</p>
+      </div>
+
+      <!-- SCENE 3: can't defend it -->
+      <div class="scene" data-name="If you can't measure it, you can't defend it">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- model in the middle with a ? -->
+            <g class="anim e-pop d1" transform="translate(290,125)">
+              <rect x="-52" y="-40" width="104" height="80" rx="14" fill="var(--navy-dark)"/>
+              <text x="0" y="2" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">your</text>
+              <text x="0" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">model</text>
+              <circle class="anim e-glow d3" cx="0" cy="-26" r="13" fill="var(--red)"/>
+              <text x="0" y="-21" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">?</text>
+            </g>
+            <!-- four askers -->
+            <g class="anim e-drop d3" transform="translate(80,52)">
+              <rect x="-58" y="-20" width="116" height="40" rx="10" fill="#fff" stroke="var(--border)" stroke-width="1.4"/>
+              <text x="0" y="-2" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--navy)">⚖️ a regulator</text>
+              <text x="0" y="13" text-anchor="middle" font-size="9" fill="var(--text-muted)">"prove it's compliant"</text>
+            </g>
+            <g class="anim e-drop d4" transform="translate(500,52)">
+              <rect x="-58" y="-20" width="116" height="40" rx="10" fill="#fff" stroke="var(--border)" stroke-width="1.4"/>
+              <text x="0" y="-2" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--navy)">🤝 a client</text>
+              <text x="0" y="13" text-anchor="middle" font-size="9" fill="var(--text-muted)">"why should I trust it?"</text>
+            </g>
+            <g class="anim e-rise d5" transform="translate(80,200)">
+              <rect x="-58" y="-20" width="116" height="40" rx="10" fill="#fff" stroke="var(--border)" stroke-width="1.4"/>
+              <text x="0" y="-2" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--navy)">👥 a colleague</text>
+              <text x="0" y="13" text-anchor="middle" font-size="9" fill="var(--text-muted)">"how do we know?"</text>
+            </g>
+            <g class="anim e-rise d6" transform="translate(500,200)">
+              <rect x="-62" y="-20" width="124" height="40" rx="10" fill="#fff" stroke="var(--orange)" stroke-width="1.6"/>
+              <text x="0" y="-2" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--orange)">😟 you, 11pm Friday</text>
+              <text x="0" y="13" text-anchor="middle" font-size="9" fill="var(--text-muted)">"what just went wrong?"</text>
+            </g>
+            <path class="anim e-dash d4" d="M140 60 L242 104" stroke="var(--text-muted)" stroke-width="1.6" fill="none"/>
+            <path class="anim e-dash d4" d="M440 60 L338 104" stroke="var(--text-muted)" stroke-width="1.6" fill="none"/>
+            <path class="anim e-dash d6" d="M140 192 L242 146" stroke="var(--text-muted)" stroke-width="1.6" fill="none"/>
+            <path class="anim e-dash d6" d="M440 192 L338 146" stroke="var(--orange)" stroke-width="1.6" fill="none"/>
+          </svg>
+        </div>
+        <p class="caption cap-fade">A model you haven't evaluated is a model you <b>cannot defend</b>.</p>
+        <p class="subcap cap-fade">Not to a regulator, a client, a colleague — or to yourself when it breaks at 11pm on a Friday.</p>
+      </div>
+
+      <!-- SCENE 4: three lenses overview -->
+      <div class="scene" data-name="Three lenses for any output">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- output entering -->
+            <g class="anim e-left d1" transform="translate(58,125)">
+              <rect x="-34" y="-34" width="68" height="68" rx="10" fill="#fff" stroke="var(--border)" stroke-width="1.6"/>
+              <line x1="-18" y1="-14" x2="18" y2="-14" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="-18" y1="0" x2="18" y2="0" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="-18" y1="14" x2="6" y2="14" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"/>
+              <text x="0" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-muted)">an output</text>
+            </g>
+            <path class="anim e-dash d2" d="M96 125 H150" stroke="var(--orange)" stroke-width="2.4" fill="none"/>
+            <!-- three lenses -->
+            <g class="anim e-pop d3" transform="translate(200,125)"><ellipse cx="0" cy="0" rx="22" ry="48" fill="var(--orange-glow)" stroke="var(--orange)" stroke-width="2"/><text x="0" y="-58" text-anchor="middle" font-size="10" font-weight="800" fill="var(--orange)">FAITHFUL?</text></g>
+            <g class="anim e-pop d4" transform="translate(270,125)"><ellipse cx="0" cy="0" rx="22" ry="48" fill="var(--orange-glow)" stroke="var(--orange)" stroke-width="2"/><text x="0" y="62" text-anchor="middle" font-size="10" font-weight="800" fill="var(--orange)">RELEVANT?</text></g>
+            <g class="anim e-pop d5" transform="translate(340,125)"><ellipse cx="0" cy="0" rx="22" ry="48" fill="var(--orange-glow)" stroke="var(--orange)" stroke-width="2"/><text x="0" y="-58" text-anchor="middle" font-size="10" font-weight="800" fill="var(--orange)">FORMAT?</text></g>
+            <path class="anim e-dash d6" d="M386 125 H446" stroke="var(--green)" stroke-width="2.4" fill="none"/>
+            <!-- scored output -->
+            <g class="anim e-right d7" transform="translate(500,125)">
+              <rect x="-40" y="-36" width="80" height="72" rx="12" fill="#fff" stroke="var(--green)" stroke-width="2"/>
+              <text x="0" y="-6" text-anchor="middle" font-size="22" font-weight="800" fill="var(--green)">8/10</text>
+              <text x="0" y="16" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--text-secondary)">a verdict</text>
+              <text x="0" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="var(--green)">scored</text>
+            </g>
+          </svg>
+        </div>
+        <p class="caption cap-fade">Hold every output up to <b>three lenses</b> in turn.</p>
+        <p class="subcap cap-fade">Faithfulness, relevance, format compliance — three plain questions, applied to each result.</p>
+      </div>
+
+      <!-- SCENE 5: Faithfulness -->
+      <div class="scene" data-name="Lens 1 — Faithfulness">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- source -->
+            <g class="anim e-left d1" transform="translate(110,125)">
+              <rect x="-72" y="-72" width="144" height="144" rx="12" fill="#fff" stroke="var(--border)" stroke-width="1.6"/>
+              <text x="0" y="-50" text-anchor="middle" font-size="10" font-weight="800" fill="var(--text-muted)">SOURCE</text>
+              <line x1="-54" y1="-30" x2="54" y2="-30" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="-54" y1="-16" x2="40" y2="-16" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+              <rect x="-54" y="2" width="108" height="26" rx="6" fill="var(--green-light)"/>
+              <text x="0" y="20" text-anchor="middle" font-size="11" font-weight="800" fill="var(--green)">Refund: 30 days</text>
+              <line x1="-54" y1="44" x2="30" y2="44" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <path class="anim e-dash d3" d="M186 125 H250" stroke="var(--orange)" stroke-width="2.4" fill="none"/>
+            <!-- output: kept vs altered -->
+            <g class="anim e-right d4" transform="translate(330,80)">
+              <rect x="-30" y="-22" width="220" height="44" rx="10" fill="#fff" stroke="var(--green)" stroke-width="2"/>
+              <circle cx="-8" cy="0" r="12" fill="var(--green-light)"/>
+              <path d="M-13 0 l4 4 7 -8" fill="none" stroke="var(--green)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="14" y="-2" font-size="11" font-weight="700" fill="var(--navy)">"You have 30 days</text>
+              <text x="14" y="13" font-size="11" font-weight="700" fill="var(--navy)">to request a refund."</text>
+            </g>
+            <g class="anim e-right d6" transform="translate(330,168)">
+              <rect x="-30" y="-22" width="220" height="44" rx="10" fill="#fff" stroke="var(--red)" stroke-width="2" stroke-dasharray="5 4"/>
+              <circle cx="-8" cy="0" r="12" fill="#FBE9E8"/>
+              <path d="M-13 -5 l10 10 M-3 -5 l-10 10" stroke="var(--red)" stroke-width="2.6" stroke-linecap="round"/>
+              <text x="14" y="-2" font-size="11" font-weight="700" fill="var(--text-secondary)">"Refunds within</text>
+              <text x="14" y="13" font-size="11" font-weight="700" fill="var(--red)">14 days." ✗ invented</text>
+            </g>
+          </svg>
+        </div>
+        <p class="caption cap-fade"><b>Faithfulness:</b> does the output stay true to the input — facts preserved, constraints honoured?</p>
+        <p class="subcap cap-fade">The most important lens whenever the model is summarising, extracting, or transforming source material.</p>
+      </div>
+
+      <!-- SCENE 6: Relevance -->
+      <div class="scene" data-name="Lens 2 — Relevance">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- question -->
+            <g class="anim e-left d1" transform="translate(140,70)">
+              <rect x="-118" y="-26" width="236" height="52" rx="14" fill="var(--navy)"/>
+              <path d="M-90 26 l-8 16 24 -16 z" fill="var(--navy)"/>
+              <text x="0" y="-2" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">"What is your refund</text>
+              <text x="0" y="14" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">window?"  ← the question</text>
+            </g>
+            <!-- fluent but off-target answer -->
+            <g class="anim e-right d3" transform="translate(440,150)">
+              <rect x="-128" y="-30" width="256" height="60" rx="14" fill="#fff" stroke="var(--border)" stroke-width="1.6"/>
+              <path d="M96 30 l10 18 -28 -18 z" fill="#fff" stroke="var(--border)" stroke-width="1.6"/>
+              <text x="0" y="-8" text-anchor="middle" font-size="11" font-weight="700" fill="var(--navy)">"Great news — we ship</text>
+              <text x="0" y="8" text-anchor="middle" font-size="11" font-weight="700" fill="var(--navy)">orders within 2 days!"</text>
+              <text x="0" y="24" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--text-muted)">fluent · accurate · about the wrong thing</text>
+            </g>
+            <!-- mismatch marker -->
+            <g class="anim e-pop d5" transform="translate(290,118)">
+              <circle r="26" fill="#FBE9E8" stroke="var(--red)" stroke-width="2"/>
+              <text x="0" y="9" text-anchor="middle" font-size="24" font-weight="800" fill="var(--red)">≠</text>
+            </g>
+          </svg>
+        </div>
+        <p class="caption cap-fade"><b>Relevance:</b> does the output address what was actually asked?</p>
+        <p class="subcap cap-fade">It is depressingly common to get a fluent, accurate answer — to a question you never asked.</p>
+      </div>
+
+      <!-- SCENE 7: Format compliance -->
+      <div class="scene" data-name="Lens 3 — Format compliance">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- the brief / required structure -->
+            <g class="anim e-left d1" transform="translate(118,125)">
+              <rect x="-78" y="-78" width="156" height="156" rx="12" fill="#fff" stroke="var(--orange)" stroke-width="2"/>
+              <text x="0" y="-58" text-anchor="middle" font-size="10" font-weight="800" fill="var(--orange)">THE BRIEF</text>
+              <g transform="translate(-58,-38)">
+                <rect x="0" y="0" width="116" height="22" rx="6" fill="var(--orange-glow)"/><text x="8" y="15" font-size="10" font-weight="700" fill="var(--navy)">Summary (≤2 lines)</text>
+                <rect x="0" y="30" width="116" height="22" rx="6" fill="var(--orange-glow)"/><text x="8" y="45" font-size="10" font-weight="700" fill="var(--navy)">3 bullet steps</text>
+                <rect x="0" y="60" width="116" height="22" rx="6" fill="var(--orange-glow)"/><text x="8" y="75" font-size="10" font-weight="700" fill="var(--navy)">Source citation</text>
+                <rect x="0" y="90" width="116" height="22" rx="6" fill="var(--orange-glow)"/><text x="8" y="105" font-size="10" font-weight="700" fill="var(--navy)">Polite tone</text>
+              </g>
+            </g>
+            <path class="anim e-dash d3" d="M200 125 H252" stroke="var(--text-muted)" stroke-width="2.4" fill="none"/>
+            <!-- the blob output -->
+            <g class="anim e-right d4" transform="translate(388,125)">
+              <rect x="-78" y="-78" width="156" height="156" rx="12" fill="#fff" stroke="var(--red)" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="0" y="-58" text-anchor="middle" font-size="10" font-weight="800" fill="var(--red)">THE OUTPUT</text>
+              <path class="anim e-glow d5" d="M-56 -34 q40 -8 112 4 q-30 12 -108 6 q50 6 110 2 q-44 14 -110 4 q56 10 108 0 q-40 16 -106 4" fill="none" stroke="var(--text-muted)" stroke-width="3.4" stroke-linecap="round"/>
+              <g transform="translate(40,52)"><circle r="16" fill="#FBE9E8"/><path d="M-7 -7 l14 14 M7 -7 l-14 14" stroke="var(--red)" stroke-width="3" stroke-linecap="round"/></g>
+              <text x="-14" y="64" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--red)">one shapeless blob</text>
+            </g>
+          </svg>
+        </div>
+        <p class="caption cap-fade"><b>Format compliance:</b> did it follow the structure you asked for — length, tone, sections, fields, citations?</p>
+        <p class="subcap cap-fade">An output that ignores the format is unusable downstream, even when the content is good.</p>
+      </div>
+
+      <!-- SCENE 8: LLM-as-judge -->
+      <div class="scene" data-name="LLM-as-judge">
+        <div class="art">
+          <svg viewBox="0 0 580 250">
+            <!-- output in -->
+            <g class="anim e-left d1" transform="translate(62,125)">
+              <rect x="-34" y="-32" width="68" height="64" rx="10" fill="#fff" stroke="var(--border)" stroke-width="1.6"/>
+              <line x1="-18" y1="-12" x2="18" y2="-12" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="-18" y1="0" x2="18" y2="0" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="-18" y1="12" x2="4" y2="12" stroke="var(--text-muted)" stroke-width="3" stroke-linecap="round"/>
+              <text x="0" y="50" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--text-muted)">output A</text>
+            </g>
+            <path class="anim e-dash d2" d="M100 125 H156" stroke="var(--orange)" stroke-width="2.4" fill="none"/>
+            <!-- judge model -->
+            <g class="anim e-pop d3" transform="translate(232,125)">
+              <rect x="-72" y="-58" width="144" height="116" rx="16" fill="var(--navy-dark)"/>
+              <text x="0" y="-34" text-anchor="middle" font-size="18">⚖️</text>
+              <text x="0" y="-12" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Judge model</text>
+              <g transform="translate(-50,2)" font-size="9.5" fill="var(--orange-light)" font-weight="700">
+                <text x="0" y="0">✓ faithful?</text>
+                <text x="0" y="15">✓ relevant?</text>
+                <text x="0" y="30">✓ format?</text>
+              </g>
+              <text x="38" y="40" text-anchor="middle" font-size="8.5" fill="var(--text-muted)">your rubric</text>
+            </g>
+            <path class="anim e-dash d5" d="M308 125 H372" stroke="var(--green)" stroke-width="2.4" fill="none"/>
+            <!-- score out -->
+            <g class="anim e-right d6" transform="translate(440,125)">
+              <rect x="-50" y="-44" width="100" height="88" rx="14" fill="#fff" stroke="var(--green)" stroke-width="2.2"/>
+              <text x="0" y="-6" text-anchor="middle" font-size="26" font-weight="800" fill="var(--green)">9/10</text>
+              <text x="0" y="16" text-anchor="middle" font-size="9.5" fill="var(--text-secondary)">+ a reason</text>
+              <text x="0" y="62" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--green)">scored at scale</text>
+            </g>
+            <text class="anim e-rise d7" x="232" y="232" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--green)">LLM-AS-JUDGE</text>
+          </svg>
+        </div>
+        <p class="caption cap-fade"><b>LLM-as-judge</b> <span class="def-tag">DEFINITION</span> — one model scores another's output against a rubric <i>you</i> design.</p>
+        <p class="subcap cap-fade">Invaluable for scaling routine quality checks — but not a substitute for human judgement on the hardest cases. This week: build a rubric, score ten outputs, find one honest failure.</p>
+      </div>
+
+    </div><!-- /stage -->
+
+    <div class="controls">
+      <button class="btn" id="prev"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Back</button>
+      <button class="play-toggle" id="playBtn"><span class="pp" id="ppIcon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span id="playLabel">Auto-play</span></button>
+      <button class="btn btn-primary" id="next">Next <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </div>
+
+  <p class="foot">Use <kbd>←</kbd> <kbd>→</kbd> arrow keys, tap the dots, or hit Auto-play to watch it run.</p>
+</div>
+
+<script>
+(function(){
+  const scenes=[...document.querySelectorAll('.scene')];
+  const dotsWrap=document.getElementById('dots');
+  const chip=document.getElementById('chip'),nameEl=document.getElementById('sceneName');
+  const prev=document.getElementById('prev'),next=document.getElementById('next');
+  const pfill=document.getElementById('pfill');
+  const playBtn=document.getElementById('playBtn'),ppIcon=document.getElementById('ppIcon'),playLabel=document.getElementById('playLabel');
+  let i=0,playing=false,timer=null;const total=scenes.length,DUR=7500;
+
+  scenes.forEach((s,idx)=>{const b=document.createElement('button');b.addEventListener('click',()=>{stopPlay();go(idx);});dotsWrap.appendChild(b);});
+  const dots=[...dotsWrap.children];
+
+  function retrigger(scene){scene.querySelectorAll('.anim').forEach(el=>{el.style.animation='none';void el.offsetWidth;el.style.animation='';});}
+  function go(n){
+    i=(n+total)%total;
+    scenes.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+    retrigger(scenes[i]);
+    chip.textContent='Step '+(i+1)+' / '+total;
+    nameEl.textContent=scenes[i].dataset.name;
+    dots.forEach((d,idx)=>{d.className='';if(idx===i)d.classList.add('active');else if(idx<i)d.classList.add('done');});
+    prev.disabled=(i===0);
+    next.firstChild.textContent=(i===total-1)?'Restart ':'Next ';
+    if(playing)runBar();
+  }
+  function runBar(){pfill.classList.remove('run');pfill.style.width='0';void pfill.offsetWidth;pfill.classList.add('run');pfill.style.width='100%';clearTimeout(timer);timer=setTimeout(()=>{if(i===total-1){stopPlay();}else{go(i+1);}},DUR);}
+  function startPlay(){playing=true;ppIcon.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';playLabel.textContent='Pause';runBar();}
+  function stopPlay(){playing=false;clearTimeout(timer);pfill.classList.remove('run');pfill.style.width='0';ppIcon.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';playLabel.textContent='Auto-play';}
+
+  prev.addEventListener('click',()=>{stopPlay();go(i-1);});
+  next.addEventListener('click',()=>{stopPlay();(i===total-1)?go(0):go(i+1);});
+  playBtn.addEventListener('click',()=>{playing?stopPlay():startPlay();});
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){stopPlay();go(i+1);}if(e.key==='ArrowLeft'){stopPlay();go(i-1);}});
+  go(0);
+})();
+</script>
+</body>
+</html>
