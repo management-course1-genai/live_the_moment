@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Evaluator's Eye — judging any AI output, hands-on</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--green-dark:#388E3C;
+  --red:#D64545;--red-light:#FBEAEA;--amber:#E8A040;--amber-light:#FBF1E2;--amber-dark:#B57717;
+  --blue:#4285F4;--blue-light:#E8F0FE;--teal:#0FA3A3;--purple:#9C5BD6;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);--shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+::selection{background:var(--orange);color:#fff}
+
+/* TOP BAR + NAV */
+.top-bar{background:var(--navy-dark);padding:.45rem 2rem;display:flex;justify-content:center;gap:.5rem;align-items:center;font-size:.72rem;color:rgba(255,255,255,0.7);font-weight:500;letter-spacing:.03em;text-align:center}
+.top-bar b{color:var(--orange-light);font-weight:700}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;height:70px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.1}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.18rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.6rem;color:var(--text-muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.logo-mark{display:block}
+.logo-mark svg{height:48px;width:auto;display:block;filter:drop-shadow(0 3px 6px rgba(43,45,66,.12))}
+.nav-right{display:flex;align-items:center;gap:1.2rem}
+.nav-progress-wrap{display:flex;align-items:center;gap:.6rem}
+.nav-progress-label{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.nav-progress-bar{width:130px;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.nav-progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--green));border-radius:4px;transition:width .5s cubic-bezier(.25,.46,.45,.94)}
+
+/* HERO */
+.hero{padding:4.5rem 2rem 3rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-120px;right:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,var(--orange-glow),transparent 70%);z-index:0}
+.hero::after{content:'';position:absolute;bottom:-100px;left:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(66,133,244,0.07),transparent 70%);z-index:0}
+.hero-inner{max-width:1000px;margin:0 auto;position:relative;z-index:2;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.42rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1.3rem;animation:fadeUp .7s ease}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.1rem,5vw,3.3rem);line-height:1.12;color:var(--navy);margin-bottom:1.1rem;animation:fadeUp .7s ease .08s both}
+.hero h1 em{font-style:italic;color:var(--orange)}
+.hero-sub{font-size:1.05rem;color:var(--text-secondary);line-height:1.7;max-width:660px;margin:0 auto 1.6rem;animation:fadeUp .7s ease .16s both}
+.audience-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;animation:fadeUp .7s ease .24s both}
+.aud-chip{font-size:.72rem;font-weight:600;color:var(--text-secondary);background:var(--bg-card);border:1.5px solid var(--border);border-radius:50px;padding:.4rem .9rem;display:inline-flex;align-items:center;gap:.4rem}
+.aud-chip .d{width:7px;height:7px;border-radius:50%}
+.aud-chip:nth-child(1) .d{background:var(--orange)}.aud-chip:nth-child(2) .d{background:var(--teal)}
+.aud-chip:nth-child(3) .d{background:var(--blue)}.aud-chip:nth-child(4) .d{background:var(--purple)}
+.aud-chip:nth-child(5) .d{background:var(--green)}
+
+/* STATION NAV */
+.station-nav{position:sticky;top:70px;z-index:90;background:var(--bg-light);border-bottom:1px solid var(--border);padding:.7rem 1rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;box-shadow:var(--shadow-sm)}
+.station-nav a{text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:50px;font-size:.78rem;font-weight:600;color:var(--text-secondary);background:var(--bg-card);border:1.5px solid var(--border);transition:all .2s;white-space:nowrap}
+.station-nav a:hover{border-color:var(--orange);color:var(--orange)}
+.station-nav a.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.station-nav a .n{font-family:'DM Serif Display',serif;opacity:.7}
+
+/* SECTIONS */
+section.station{padding:4rem 2rem;scroll-margin-top:140px}
+.container{max-width:920px;margin:0 auto}
+.sec-head{margin-bottom:2rem}
+.sec-kicker{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:.7rem}
+.sec-kicker .num{font-family:'DM Serif Display',serif;width:30px;height:30px;border-radius:50%;background:var(--orange-glow);display:flex;align-items:center;justify-content:center;font-size:.95rem;color:var(--orange)}
+.sec-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,3vw,2.2rem);color:var(--navy);line-height:1.2;margin-bottom:.6rem}
+.sec-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:700px}
+.sec-intro b{color:var(--text-primary);font-weight:700}
+
+.lab{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;margin-top:1.8rem}
+.lab-bar{background:var(--bg-light);border-bottom:1px solid var(--border);padding:.7rem 1.2rem;display:flex;align-items:center;gap:.5rem}
+.lab-dots{display:flex;gap:.35rem}
+.lab-dots span{width:10px;height:10px;border-radius:50%}
+.lab-dots span:nth-child(1){background:#ff5f57}.lab-dots span:nth-child(2){background:#febc2e}.lab-dots span:nth-child(3){background:#28c840}
+.lab-bar-title{font-size:.74rem;font-weight:600;color:var(--text-muted);font-family:'DM Serif Display',serif;letter-spacing:.02em}
+.lab-body{padding:1.6rem}
+.try-tag{display:inline-flex;align-items:center;gap:.35rem;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--green-dark);background:var(--green-light);padding:.28rem .7rem;border-radius:50px;margin-bottom:1rem}
+
+/* source / brief panels */
+.panel{border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.1rem;font-size:.86rem;line-height:1.65}
+.panel-label{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem}
+.panel.source{background:var(--bg-light);border-left:3px solid var(--navy)}
+.panel.source .panel-label{color:var(--navy)}
+.panel.brief{background:var(--blue-light);border-left:3px solid var(--blue)}
+.panel.brief .panel-label{color:var(--blue)}
+.panel.brief ul{margin:.3rem 0 0 1.1rem}
+.panel.brief li{margin-bottom:.15rem}
+
+/* DEFINITION */
+.defn{background:var(--bg-light);border-left:3px solid var(--orange);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-top:1.6rem}
+.defn .defn-label{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:.35rem}
+.defn .defn-term{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.3rem}
+.defn p{font-size:.84rem;color:var(--text-secondary);line-height:1.65}
+.defn p b{color:var(--text-primary)}
+
+/* WORLD strip */
+.world{margin-top:1.4rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.3rem}
+.world-title{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.9rem}
+.world-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+.world-card{border-radius:var(--radius-sm);padding:.75rem .85rem;background:var(--bg-light);border-top:3px solid var(--orange)}
+.world-card:nth-child(2){border-top-color:var(--teal)}.world-card:nth-child(3){border-top-color:var(--blue)}.world-card:nth-child(4){border-top-color:var(--purple)}
+.world-card .wl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-muted);margin-bottom:.25rem}
+.world-card .wt{font-size:.78rem;color:var(--text-primary);line-height:1.45}
+
+button{font-family:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.65rem 1.4rem;border-radius:10px;font-size:.85rem;font-weight:600;border:none;background:var(--orange);color:#fff;transition:all .2s}
+.btn:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,122,46,0.3)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}
+.btn-ghost:hover{background:transparent;border-color:var(--orange);color:var(--orange);box-shadow:none}
+
+/* ===== STATION 1: FAITHFULNESS (spot the drift) ===== */
+.fa-out-label{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--orange);margin-bottom:.5rem}
+.fa-sents{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.1rem}
+.fa-sent{text-align:left;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-family:inherit;font-size:.86rem;color:var(--text-primary);line-height:1.5;transition:all .18s;display:flex;gap:.6rem;align-items:flex-start}
+.fa-sent:hover{border-color:var(--orange)}
+.fa-sent .fa-mark{flex-shrink:0;width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:transparent;margin-top:.1rem}
+.fa-sent.flagged{border-color:var(--amber);background:var(--amber-light)}
+.fa-sent.flagged .fa-mark{background:var(--amber);border-color:var(--amber);color:#fff}
+.fa-sent .fa-why{display:none;font-size:.76rem;margin-top:.4rem;padding-top:.4rem;border-top:1px dashed var(--border)}
+.fa-sent.revealed{cursor:default}
+.fa-sent.revealed .fa-why{display:block}
+.fa-sent.revealed.true-faithful{border-color:var(--green);background:var(--green-light)}
+.fa-sent.revealed.true-faithful .fa-mark{background:var(--green);border-color:var(--green);color:#fff}
+.fa-sent.revealed.true-drift{border-color:var(--red);background:var(--red-light)}
+.fa-sent.revealed.true-drift .fa-mark{background:var(--red);border-color:var(--red);color:#fff}
+.fa-controls{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.fa-result{padding:1rem 1.1rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.55;display:none;margin-top:1rem;animation:popIn .3s ease}
+.fa-result.show{display:block}
+.fa-result.good{background:var(--green-light);border-left:3px solid var(--green);color:var(--green-dark)}
+.fa-result.mid{background:var(--amber-light);border-left:3px solid var(--amber);color:var(--amber-dark)}
+
+/* shared option cards (relevance) ===== */
+.opt-q{display:flex;gap:.7rem;align-items:flex-start;margin-bottom:1rem}
+.opt-q .qa{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#b07fe0);display:flex;align-items:center;justify-content:center;color:#fff}
+.opt-q .qa svg{width:18px;height:18px}
+.opt-q .qb{background:var(--bg-light);border-radius:4px 14px 14px 14px;padding:.7rem 1rem;font-size:.9rem;color:var(--text-primary);line-height:1.5}
+.opt-q .qb .who{display:block;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.2rem}
+.opts{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.9rem}
+.opt{text-align:left;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);line-height:1.5;transition:all .2s}
+.opt:hover:not(:disabled){border-color:var(--orange);background:var(--orange-glow)}
+.opt:disabled{cursor:default}
+.opt.reveal-good{border-color:var(--green);background:var(--green-light)}
+.opt.reveal-bad{border-color:var(--red);background:var(--red-light)}
+.opt .vt{display:inline-block;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:.12rem .5rem;border-radius:4px;margin-bottom:.4rem}
+.opt.reveal-good .vt{background:var(--green);color:#fff}
+.opt.reveal-bad .vt{background:var(--red);color:#fff}
+.opt .why{display:none;font-size:.78rem;color:var(--text-secondary);margin-top:.45rem;padding-top:.45rem;border-top:1px dashed var(--border)}
+.opt.revealed .why{display:block}
+.next-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;min-height:2.4rem}
+.rl-feedback{font-size:.82rem;font-weight:600}
+.rl-feedback.good{color:var(--green-dark)}.rl-feedback.bad{color:var(--red)}
+.rl-round{display:none}.rl-round.active{display:block;animation:popIn .35s ease}
+
+/* ===== STATION 3: FORMAT (judge each rule) ===== */
+.fmt-output{background:var(--navy-dark);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin-bottom:1.2rem;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.82rem;color:rgba(255,255,255,.92);line-height:1.8;white-space:pre-wrap}
+.fmt-rules{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
+.fmt-rule{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;background:var(--bg-card)}
+.fmt-rule .rh{display:flex;justify-content:space-between;gap:.8rem;align-items:center;flex-wrap:wrap}
+.fmt-rule .rtx{font-size:.84rem;color:var(--text-primary);font-weight:500}
+.fmt-rule .rbtns{display:flex;gap:.4rem;flex-shrink:0}
+.fmt-rule .rb{padding:.35rem .8rem;border-radius:7px;font-size:.74rem;font-weight:700;border:1.5px solid var(--border);background:var(--bg-light);color:var(--text-secondary);transition:all .15s}
+.fmt-rule .rb:hover{border-color:var(--orange);color:var(--orange)}
+.fmt-rule .rb.pick-pass{background:var(--green);border-color:var(--green);color:#fff}
+.fmt-rule .rb.pick-fail{background:var(--red);border-color:var(--red);color:#fff}
+.fmt-rule .rb:disabled{cursor:default;opacity:1}
+.fmt-rule .rverdict{display:none;font-size:.77rem;margin-top:.55rem;padding-top:.5rem;border-top:1px dashed var(--border);line-height:1.5}
+.fmt-rule.done .rverdict{display:block}
+.fmt-rule.correct{border-color:var(--green)}
+.fmt-rule.wrong{border-color:var(--amber)}
+.fmt-rule .rverdict .vlabel{font-weight:800}
+.fmt-rule.correct .rverdict .vlabel{color:var(--green-dark)}
+.fmt-rule.wrong .rverdict .vlabel{color:var(--amber-dark)}
+.fmt-summary{padding:1rem 1.1rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.55;display:none;animation:popIn .3s ease;background:var(--red-light);border-left:3px solid var(--red);color:var(--red)}
+.fmt-summary.show{display:block}
+.fmt-summary b{font-weight:800}
+
+/* ===== STATION 4: LLM-AS-JUDGE CONSOLE ===== */
+.lens-row{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.9rem 1rem;margin-bottom:.7rem;background:var(--bg-card)}
+.lens-top{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap}
+.lens-name{font-weight:700;font-size:.88rem;color:var(--navy)}
+.lens-name span{display:block;font-size:.72rem;font-weight:500;color:var(--text-muted);margin-top:.1rem}
+.lens-btns{display:flex;gap:.4rem;flex-shrink:0}
+.lens-btn{padding:.35rem .75rem;border-radius:7px;font-size:.72rem;font-weight:700;border:1.5px solid var(--border);background:var(--bg-light);color:var(--text-secondary);transition:all .15s}
+.lens-btn:hover{border-color:var(--orange);color:var(--orange)}
+.lens-btn.sel-pass{background:var(--green);border-color:var(--green);color:#fff}
+.lens-btn.sel-partial{background:var(--amber);border-color:var(--amber);color:#fff}
+.lens-btn.sel-fail{background:var(--red);border-color:var(--red);color:#fff}
+.lens-judge{display:none;margin-top:.7rem;padding-top:.6rem;border-top:1px dashed var(--border);font-size:.78rem;line-height:1.5}
+.lens-row.judged .lens-judge{display:block}
+.lens-judge .jverdict{font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:.68rem;padding:.12rem .5rem;border-radius:4px;margin-right:.4rem}
+.jverdict.pass{background:var(--green);color:#fff}.jverdict.partial{background:var(--amber);color:#fff}.jverdict.fail{background:var(--red);color:#fff}
+.lens-judge .agree{font-weight:700;margin-left:.3rem}
+.judge-final{display:none;margin-top:1rem;animation:popIn .35s ease}
+.judge-final.show{display:block}
+
+/* INSIGHT + CLOSING */
+.insight{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.2rem;margin-top:2rem;position:relative;overflow:hidden}
+.insight::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;border-radius:50%;background:rgba(232,122,46,.1)}
+.insight-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--orange-light);margin-bottom:.6rem;position:relative;z-index:1}
+.insight p{color:rgba(255,255,255,.85);font-size:1rem;line-height:1.7;position:relative;z-index:1}
+.insight p b{color:#fff}
+.closing{text-align:center;padding:4rem 2rem}
+.closing-box{max-width:760px;margin:0 auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:2.8rem 2.2rem;box-shadow:var(--shadow-md)}
+.closing-box h2{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,3vw,2rem);color:var(--navy);margin-bottom:.8rem}
+.closing-box>p{color:var(--text-secondary);font-size:.95rem;margin-bottom:1.8rem;line-height:1.7}
+.recap{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;text-align:left}
+.recap-item{background:var(--bg-light);border-radius:var(--radius-sm);padding:.9rem 1rem;border-top:3px solid var(--orange)}
+.recap-item:nth-child(2){border-top-color:var(--teal)}.recap-item:nth-child(3){border-top-color:var(--blue)}.recap-item:nth-child(4){border-top-color:var(--purple)}
+.recap-item .rt{font-family:'DM Serif Display',serif;font-size:.9rem;color:var(--navy);margin-bottom:.2rem}
+.recap-item .rd{font-size:.72rem;color:var(--text-secondary);line-height:1.5}
+footer{background:var(--bg-card);border-top:1px solid var(--border);padding:1.8rem 2rem;text-align:center}
+footer p{font-size:.76rem;color:var(--text-muted)}
+footer b{color:var(--orange)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+@media(max-width:760px){
+  .nav-progress-bar{width:80px}
+  .world-grid{grid-template-columns:1fr 1fr}
+  .recap{grid-template-columns:1fr 1fr}
+  .nav-logo-tag{display:none}
+  section.station{padding:3rem 1.2rem}
+  .top-bar{font-size:.66rem}
+  .lens-top{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">A fluent answer isn't always a good one. Learn the <b>three lenses that tell a usable AI output from a useless one</b> — by judging some yourself.</div>
+
+<nav class="nav">
+  <a class="nav-logo" href="#top">
+    <span class="logo-mark"><svg viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M493.477 314.275H460.795C456.99 314.275 453.906 317.356 453.906 321.155C453.906 324.955 456.99 328.035 460.795 328.035H493.477C497.282 328.035 500.366 324.955 500.366 321.155C500.366 317.356 497.282 314.275 493.477 314.275Z" fill="#EF7F1A"/>
+<path d="M493.477 333.881H460.795C456.99 333.881 453.906 336.961 453.906 340.761C453.906 344.561 456.99 347.641 460.795 347.641H493.477C497.282 347.641 500.366 344.561 500.366 340.761C500.366 336.961 497.282 333.881 493.477 333.881Z" fill="#EF7F1A"/>
+<path d="M493.477 353.486H460.795C456.99 353.486 453.906 356.567 453.906 360.366C453.906 364.166 456.99 367.246 460.795 367.246H493.477C497.282 367.246 500.366 364.166 500.366 360.366C500.366 356.567 497.282 353.486 493.477 353.486Z" fill="#EF7F1A"/>
+<path d="M660.991 1316.23H299.4V1478.7H660.991V1316.23Z" fill="#2F1D19"/>
+<path d="M660.991 1016.12H299.4V1178.6H660.991V1016.12Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.306 739.607C504.655 739.607 531.748 746.804 555.61 759.624C543.303 777.076 512.159 789.468 475.682 789.468C439 789.468 407.702 776.939 395.549 759.333C419.257 746.684 446.179 739.607 475.306 739.607Z" fill="#D9DADA"/>
+<path d="M740.832 490.575C778.018 490.575 808.162 454.086 808.162 409.075C808.162 364.063 778.018 327.574 740.832 327.574C703.647 327.574 673.502 364.063 673.502 409.075C673.502 454.086 703.647 490.575 740.832 490.575Z" fill="#D9DADA"/>
+<path d="M210.549 490.575C247.734 490.575 277.879 454.086 277.879 409.075C277.879 364.063 247.734 327.574 210.549 327.574C173.364 327.574 143.219 364.063 143.219 409.075C143.219 454.086 173.364 490.575 210.549 490.575Z" fill="#D9DADA"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M145.1 428.27C152.227 464.011 178.825 490.574 210.55 490.574C242.275 490.574 268.872 464.011 276 428.27C258.017 438.645 235.284 444.85 210.55 444.85C185.816 444.85 163.065 438.645 145.1 428.27Z" fill="url(#paint0_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.7 57.6211C652.854 57.6211 759.123 184.726 759.123 355.488C759.123 526.249 699.228 703.848 475.7 703.848C252.154 703.848 192.26 526.249 192.26 355.488C192.26 184.726 298.545 57.6211 475.7 57.6211Z" fill="url(#paint1_radial_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M690.083 149.617C734.816 202.179 759.123 273.834 759.123 355.488C759.123 526.249 699.228 703.848 475.7 703.848C252.154 703.848 192.26 526.249 192.26 355.488C192.26 280.244 212.891 213.495 251.129 162.352C239.864 193.872 233.642 228.349 233.642 264.467C233.642 414.579 340.834 536.283 473.05 536.283C605.283 536.283 712.475 414.579 712.475 264.467C712.475 223.426 704.441 184.504 690.083 149.617Z" fill="url(#paint2_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M477.546 168.932C633.402 168.932 709.638 238.108 712.834 376.067C716.031 514.01 666.136 618.313 477.546 618.313C288.973 618.313 237.164 528.095 238.429 376.067C239.711 224.04 321.707 168.932 477.546 168.932Z" fill="url(#paint3_radial_6524_4415)"/>
+<mask id="mask0_6524_4415" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="377" y="168" width="326" height="451">
+<path d="M702.612 168.334H377.379V618.826H702.612V168.334Z" fill="url(#paint4_linear_6524_4415)"/>
+</mask>
+<g mask="url(#mask0_6524_4415)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M501.254 169.514C623.505 177.445 698.219 241.715 701.347 376.068C704.458 510.421 616.377 617.647 502.861 617.647C389.362 617.647 406.335 614.553 378.559 607.288C483.22 592.383 564.447 484.063 564.447 352.633C564.447 280.893 540.243 216.059 501.254 169.514Z" fill="url(#paint5_linear_6524_4415)"/>
+</g>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M747.755 475.072C721.756 600.178 646.478 703.848 475.699 703.848C304.904 703.848 229.642 600.178 203.626 475.072H202.84C230.668 592.793 315.672 664.26 473.306 667.884C628.444 671.439 717.517 588.212 747.499 475.072H747.755Z" fill="#898989"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M426.283 434.613C416.284 443.092 403.344 448.202 389.208 448.202C375.072 448.202 362.132 443.092 352.133 434.613H426.283Z" fill="#008DD2"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M602.086 434.613C592.087 443.092 579.147 448.202 565.011 448.202C550.892 448.202 537.953 443.092 527.953 434.613H602.086Z" fill="#008DD2"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M719.552 1228.71C719.552 1228.71 837.41 1213.98 906.244 1266.95C975.096 1319.91 968.395 1403.32 895.903 1446.99C823.41 1490.68 718.355 1492.15 622.633 1478.09C526.894 1464 529.099 1442.1 369.243 1471.32C178.893 1506.1 10.7125 1474.96 0.918093 1375.46C-8.87633 1275.94 61.3427 1243.69 132.946 1237.09C204.55 1230.47 403.361 1247.36 456.333 1262.23C509.322 1277.1 719.552 1228.71 719.552 1228.71Z" fill="#EF7F1A"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M14.9516 1414.69C7.19131 1403.06 2.33683 1389.99 0.918093 1375.46C-8.87633 1275.94 61.3427 1243.69 132.946 1237.09C204.55 1230.47 403.361 1247.36 456.333 1262.23C484.041 1270.01 554.739 1260.49 615.881 1249.63C622.838 1253.14 628.223 1256.39 629.214 1258.51C633.043 1266.8 603.899 1317.6 595.968 1322.61C588.036 1327.63 520.467 1379.34 496.297 1389.56C472.144 1399.78 219.335 1467.64 174.722 1456.48C150.091 1450.33 75.6326 1436.24 14.9516 1414.69Z" fill="#EF7F1A"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M24.6426 1283.12C49.8551 1253.53 91.1694 1240.93 132.945 1237.09C170.892 1233.58 244.564 1236.68 313.313 1242.57C318.475 1244.66 323.552 1246.95 328.441 1249.53C298.356 1261.05 284.323 1252.85 213.249 1318.81C142.193 1384.76 61.1708 1350.23 45.2228 1331.56C31.9756 1316.08 25.3947 1298.9 24.6426 1283.12Z" fill="#FF9429"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M719.551 1228.71C719.551 1228.71 837.409 1213.98 906.243 1266.95C915.354 1273.96 923.132 1281.5 929.61 1289.41C931.524 1306.37 928.533 1320.85 916.414 1328.21C873.647 1354.25 790.009 1370.98 733.311 1312.42C698.065 1276.03 661.383 1257.58 631.299 1246.83C680.22 1237.76 719.551 1228.71 719.551 1228.71Z" fill="#FF9429"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M953.781 1345.02C957.712 1383.25 937.799 1421.76 895.903 1446.99C823.411 1490.68 718.356 1492.15 622.634 1478.09C609.182 1476.1 597.661 1473.97 587.371 1471.85C535.356 1443.39 547.954 1411.22 547.954 1411.22L425.566 1462.17C409.293 1464.39 390.747 1467.39 369.244 1471.32C318.46 1480.6 269.266 1485.18 224.225 1485.03C192.602 1482.39 157.869 1479.11 123.426 1475.11C53.0019 1459.8 5.96138 1426.69 0.918875 1375.46C-0.294745 1363.08 -0.277652 1351.77 0.816315 1341.39C113.922 1426.53 319.229 1401.68 433.224 1389.39C550.757 1376.72 628.394 1283.24 628.394 1283.24L564.141 1396.43C564.141 1396.43 679.571 1412.62 803.463 1399.95C881.682 1391.95 929.286 1364.31 953.781 1345.02Z" fill="#D55222"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M487.221 1456.91C458.966 1461.68 431.035 1462.39 393.857 1467.01C448.778 1450.19 510.45 1421.2 553.884 1378.24C597.301 1335.29 628.889 1278.18 628.889 1278.18C628.889 1291.55 608.463 1367.06 573.285 1399.23C538.124 1431.42 518.433 1445.86 487.221 1456.91Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M330.407 1127.62C368.183 1114.85 423.889 1162.41 475.665 1162.29C520.859 1162.19 589.779 1113.67 624.598 1127.62C659.417 1141.55 710.304 1154.8 755.447 1168.39C739.02 1195.98 722.611 1223.57 706.201 1251.16C656.631 1223 561.866 1319.37 475.665 1318.81C384.831 1318.21 294.596 1223 245.043 1251.16C247.556 1224.03 250.085 1196.92 252.615 1169.79C278.546 1155.74 304.476 1141.67 330.407 1127.62Z" fill="#412C23"/>
+<path d="M360.167 1181.84C353.945 1175.91 353.706 1166.05 359.62 1159.81C365.552 1153.59 375.414 1153.33 381.653 1159.26C410.199 1186.32 443.309 1199.16 476.094 1199.02C510.058 1198.87 544.039 1184.8 572.636 1158.19C578.943 1152.32 588.806 1152.68 594.669 1158.97C600.532 1165.28 600.173 1175.14 593.883 1181.01C559.474 1213.02 518.04 1229.94 476.213 1230.13C435.583 1230.32 394.866 1214.71 360.167 1181.84Z" fill="#A34E1C"/>
+<path d="M333.946 1215.4C328.254 1208.97 328.852 1199.12 335.297 1193.43C341.724 1187.74 351.569 1188.34 357.261 1194.78C362.919 1201.19 368.885 1207.19 375.107 1212.8C407.054 1241.57 442.334 1255.11 477.17 1254.59C512.126 1254.06 547.15 1239.4 578.414 1211.74C584.618 1206.25 590.806 1200.08 596.977 1193.24C602.737 1186.85 612.6 1186.32 618.993 1192.08C625.403 1197.84 625.916 1207.71 620.155 1214.12C613.489 1221.52 606.429 1228.51 599.045 1235.04C562.09 1267.72 520.057 1285.05 477.546 1285.7C434.916 1286.35 392.285 1270.23 354.253 1235.98C347.467 1229.88 340.681 1223.02 333.946 1215.4Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M822.195 1218.61C853.476 1221.99 880.91 1230.9 896.209 1241.48C879.799 1247.26 869.731 1257.43 906.191 1267.02C896.328 1279.33 862.45 1285.53 822.195 1281.19C774.197 1276.01 735.293 1257.8 735.293 1240.52C735.293 1223.24 774.197 1213.43 822.195 1218.61Z" fill="#0E1E26"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M919.506 1235.45L910.857 1212.49L829.459 1194.83L755.104 1212.49L730.182 1241.53L735.874 1247.21C780.607 1272.33 882.431 1276.44 919.506 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M773.736 1229.36C775.702 1208.95 827.888 1200.34 844.366 1215.04C860.843 1229.76 859.664 1218.37 859.664 1218.37C859.664 1218.37 852.998 1207.98 868.501 1212.88C883.988 1217.79 891.663 1227.19 876.552 1234.25C861.442 1241.31 783.941 1244.87 773.736 1229.36Z" fill="#EBECEC"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M736.439 1256.03L706.201 1251.16C706.201 1251.16 708.355 1209.55 724.269 1199.57C740.183 1189.59 826.281 1168.07 846.246 1170.56C866.211 1173.06 903.32 1182.71 907.064 1188.65C910.807 1194.58 918.038 1209.77 918.038 1209.77L920.174 1235.45C884.176 1184.18 744.593 1200.65 736.439 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M918.037 1209.77C904.208 1137.95 831.562 1092.38 761.531 1091.83C700.081 1091.35 628.546 1130.19 626.854 1174.85C637.195 1214.12 670.356 1239.33 706.2 1251.16C754.831 1183.55 852.313 1171.19 918.037 1209.77Z" fill="#D9DADA"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M601.744 819.518C601.744 819.518 621.538 781.588 666.186 781.588C710.833 781.588 753.532 795.211 762.335 897.719C771.138 1000.23 791.616 1097.9 836.263 1140.67C880.911 1183.43 680.373 1193.06 672.903 1198.34C664.699 1204.13 614.256 1217.12 622.324 1110.67C628.051 1035.2 649.468 1025.05 654.562 986.655C660.118 944.828 637.366 851.414 601.744 819.518Z" fill="url(#paint6_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M802.555 1089.33C806.742 1098.79 811.272 1107.52 816.212 1115.44L748.813 1145.14L645.348 1198.99C640.904 1196.68 636.528 1192.89 632.768 1186.95C629.127 1170.78 628.306 1134.67 650.869 1057.83C661.689 1021.03 667.33 989.544 668.082 961.221C673.415 961.118 678.082 964.725 682.834 968.349C701.209 982.314 801.392 1088.8 802.555 1089.33Z" fill="#374B56"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M611.213 806.562C619.23 797.656 632.528 786.802 651.673 782.99H651.69C677.757 785.794 725.908 832.373 743.497 873.345C761.103 914.318 760.3 893.327 762.83 903.378C764.214 918.676 765.855 933.855 767.821 948.726C750.813 963.7 730.011 970.606 716.08 950.35C704.935 934.146 684.492 914.266 661.946 903.258C661.946 903.258 645.81 851.637 611.213 806.562Z" fill="#A4ACAE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M822.194 1218.61C858.158 1222.49 889.029 1233.7 902.242 1246.34C906.652 1250.56 884.926 1253.63 888.841 1255.48C891.456 1256.69 902.994 1263.91 906.173 1267.04C896.276 1279.34 862.432 1285.53 822.194 1281.19C785.666 1277.24 754.351 1268.32 736.437 1256.03C731.72 1252.8 735.292 1244.66 735.292 1240.52C735.292 1223.24 774.196 1213.43 822.194 1218.61Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M920.173 1235.45L910.857 1212.49L829.459 1194.83L755.104 1212.49L730.182 1241.53L735.874 1247.21C780.607 1272.33 883.098 1276.44 920.173 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M736.439 1256.03L706.201 1251.16C706.201 1251.16 708.355 1209.55 724.269 1199.57C740.183 1189.59 826.281 1168.07 846.246 1170.56C866.211 1173.06 903.32 1182.71 907.064 1188.65C910.807 1194.58 918.038 1209.77 918.038 1209.77L920.174 1235.45C884.176 1184.18 744.593 1200.65 736.439 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M775.94 1233.77C771.394 1212.05 800.11 1203.26 822.69 1199.69C836.673 1197.48 852.228 1202.7 851.663 1212.75C850.399 1235 864.33 1223.6 865.714 1219.48C867.013 1215.62 857.8 1211.02 858.723 1208.61C860.21 1204.7 866.124 1203.71 872.022 1206.19C881.542 1210.19 885.047 1233.23 869.936 1240.29C854.843 1247.35 779.239 1249.57 775.94 1233.77Z" fill="#FECC00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M661.947 903.258C684.493 914.266 704.937 934.145 716.082 950.35C730.013 970.605 750.815 963.699 767.823 948.726C774.814 1001.95 785.754 1051.37 802.556 1089.33C779.515 1078.98 748.866 1067.9 725.825 1069.42C683.673 1072.21 664.597 1082.55 664.597 1082.55C664.597 1082.55 683.604 1015.37 675.724 978.776C674.46 972.93 671.742 967.033 668.084 961.221C668.631 940.47 666.562 921.411 661.947 903.258Z" fill="#58666F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M587.369 1471.85C574.002 1463.51 549.286 1450.39 546.687 1422.52C531.355 1435.63 509.168 1449.27 487.887 1456.68C514.484 1456.17 552.448 1463.06 587.369 1471.85Z" fill="#FECC00"/>
+<path d="M493.477 321.164H460.795C456.99 321.164 453.906 324.244 453.906 328.044C453.906 331.844 456.99 334.924 460.795 334.924H493.477C497.282 334.924 500.366 331.844 500.366 328.044C500.366 324.244 497.282 321.164 493.477 321.164Z" fill="#FECC00"/>
+<path d="M493.477 340.77H460.795C456.99 340.77 453.906 343.85 453.906 347.65C453.906 351.449 456.99 354.53 460.795 354.53H493.477C497.282 354.53 500.366 351.449 500.366 347.65C500.366 343.85 497.282 340.77 493.477 340.77Z" fill="#FECC00"/>
+<path d="M493.477 360.359H460.795C456.99 360.359 453.906 363.44 453.906 367.239C453.906 371.039 456.99 374.119 460.795 374.119H493.477C497.282 374.119 500.366 371.039 500.366 367.239C500.366 363.44 497.282 360.359 493.477 360.359Z" fill="#FECC00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M648.632 110.746L651.453 112.866L630.736 153.445H628.719L648.632 110.746Z" fill="#5B5B5B"/>
+<path d="M630.719 26.3926H628.719V153.447H630.719V26.3926Z" fill="#FEFEFE"/>
+<path d="M629.727 48.032C642.991 48.032 653.743 37.2797 653.743 24.016C653.743 10.7523 642.991 0 629.727 0C616.463 0 605.711 10.7523 605.711 24.016C605.711 37.2797 616.463 48.032 629.727 48.032Z" fill="url(#paint7_radial_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M130.041 1218.61C98.7604 1221.99 71.3258 1230.9 56.0274 1241.48C72.4369 1247.26 82.5048 1257.43 46.0449 1267.02C55.9077 1279.33 89.7865 1285.53 130.041 1281.19C178.039 1276.01 216.943 1257.8 216.943 1240.52C216.943 1223.24 178.039 1213.43 130.041 1218.61Z" fill="#0E1E26"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M32.7285 1235.45L41.3606 1212.49L122.776 1194.83L197.131 1212.49L222.053 1241.53L216.361 1247.21C171.628 1272.33 69.8037 1276.44 32.7285 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M178.501 1229.36C176.535 1208.95 124.349 1200.34 107.871 1215.04C91.3935 1229.76 92.5729 1218.37 92.5729 1218.37C92.5729 1218.37 99.2393 1207.98 83.7357 1212.88C68.2493 1217.79 60.5744 1227.19 75.6848 1234.25C90.7952 1241.31 168.296 1244.87 178.501 1229.36Z" fill="#EBECEC"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M215.798 1256.03L246.036 1251.16C246.036 1251.16 243.882 1209.55 227.968 1199.57C212.054 1189.59 125.956 1168.07 105.991 1170.56C86.0258 1173.06 48.9164 1182.71 45.173 1188.65C41.4125 1194.58 34.1992 1209.77 34.1992 1209.77L32.0625 1235.45C68.0608 1184.18 207.644 1200.65 215.798 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M34.1992 1209.77C48.0276 1137.95 120.674 1092.38 190.705 1091.83C252.155 1091.35 323.69 1130.19 325.382 1174.85C315.041 1214.12 281.88 1239.33 246.036 1251.16C197.388 1183.55 99.9227 1171.19 34.1992 1209.77Z" fill="#D9DADA"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M149.681 1089.33C145.493 1098.79 140.946 1107.52 136.023 1115.44L203.422 1145.14L306.87 1198.99C311.332 1196.68 315.707 1192.89 319.451 1186.95C323.109 1170.78 323.929 1134.67 301.349 1057.83C290.546 1021.03 284.905 989.544 284.153 961.221C278.82 961.118 274.154 964.725 269.402 968.349C251.027 982.314 150.843 1088.8 149.681 1089.33Z" fill="#374B56"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M341.022 806.56C333.006 797.654 319.707 786.8 300.545 782.988C274.478 785.792 226.327 832.371 208.738 873.343C191.132 914.316 191.935 893.325 189.405 903.376C188.021 918.674 186.363 933.853 184.414 948.724C201.422 963.698 222.224 970.604 236.155 950.348C247.3 934.144 267.726 914.264 290.29 903.256C290.29 903.256 306.426 851.635 341.022 806.56Z" fill="#A4ACAE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M130.041 1218.61C94.0764 1222.49 65.5136 1231.65 52.3005 1244.28C47.8905 1248.51 66.0777 1253.16 62.1462 1254.98C59.531 1256.2 46.9503 1262.63 43.7539 1265.75C53.6509 1278.04 89.8031 1285.53 130.041 1281.19C166.552 1277.24 197.866 1268.32 215.797 1256.03C220.515 1252.8 216.943 1244.66 216.943 1240.52C216.943 1223.24 178.038 1213.43 130.041 1218.61Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M32.0625 1235.45L41.3612 1212.49L122.776 1194.83L197.132 1212.49L222.054 1241.53L216.362 1247.21C171.629 1272.33 69.1377 1276.44 32.0625 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M215.798 1256.03L246.036 1251.16C246.036 1251.16 243.882 1209.55 227.968 1199.57C212.054 1189.59 125.956 1168.07 105.991 1170.56C86.0258 1173.06 48.9164 1182.71 45.173 1188.65C41.4125 1194.58 34.1992 1209.77 34.1992 1209.77L32.0625 1235.45C68.0608 1184.18 207.644 1200.65 215.798 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M34.1992 1209.77C48.0276 1137.95 120.674 1092.38 190.705 1091.83C252.155 1091.35 323.69 1130.19 325.382 1174.85C315.041 1214.12 281.88 1239.33 246.036 1251.16C197.388 1183.55 99.9227 1171.19 34.1992 1209.77Z" fill="url(#paint8_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M176.295 1233.77C180.842 1212.05 152.125 1203.26 129.545 1199.69C115.545 1197.48 100.008 1202.7 100.572 1212.75C101.82 1235 87.8886 1223.6 86.5041 1219.48C85.205 1215.62 94.4354 1211.02 93.5123 1208.61C92.0252 1204.7 86.1109 1203.71 80.2138 1206.19C70.6929 1210.19 67.1887 1233.23 82.2821 1240.29C97.3925 1247.35 172.979 1249.57 176.295 1233.77Z" fill="#FECC00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M290.291 903.258C267.727 914.266 247.301 934.145 236.156 950.35C222.225 970.605 201.423 963.699 184.415 948.726C177.424 1001.95 166.467 1051.37 149.682 1089.33C172.723 1078.98 203.371 1067.9 226.413 1069.42C268.565 1072.21 287.641 1082.55 287.641 1082.55C287.641 1082.55 268.616 1015.37 276.513 978.776C277.778 972.93 280.479 967.033 284.154 961.221C283.607 940.47 285.675 921.411 290.291 903.258Z" fill="#58666F"/>
+<path d="M268.428 841.961C276.716 841.961 283.436 835.242 283.436 826.953C283.436 818.665 276.716 811.945 268.428 811.945C260.139 811.945 253.42 818.665 253.42 826.953C253.42 835.242 260.139 841.961 268.428 841.961Z" fill="#EBECEC"/>
+<path d="M308.221 163.513C318.718 163.513 327.228 155.003 327.228 144.506C327.228 134.008 318.718 125.498 308.221 125.498C297.723 125.498 289.213 134.008 289.213 144.506C289.213 155.003 297.723 163.513 308.221 163.513Z" fill="#FEFEFE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M700.955 813.586C711.45 813.586 719.963 822.098 719.963 832.594C719.963 843.089 711.45 851.601 700.955 851.601C690.46 851.601 681.947 843.089 681.947 832.594C681.947 822.098 690.46 813.586 700.955 813.586Z" fill="#FEFEFE" fill-opacity="0.501961"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.307 739.607C516.775 739.607 553.765 753.949 583.422 778.306C563.029 805.536 522.433 824.099 475.683 824.099C428.694 824.099 387.943 805.365 367.637 777.93C397.208 753.795 434.044 739.607 475.307 739.607Z" fill="#A4ACAE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M537.012 747.316C542.858 751.863 548.447 755.76 555.609 759.624C543.302 777.076 512.158 789.468 475.681 789.468C438.982 789.468 407.702 776.922 395.531 759.333C402.693 755.521 411.394 750.051 414.522 747.436C429.273 755.948 453.118 763.247 475.681 763.247C498.244 763.247 522.278 755.743 537.012 747.316Z" fill="#58666F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M537.014 747.317C522.091 757.077 500.143 763.248 475.683 763.248C451.308 763.248 429.429 757.128 414.523 747.436C443.479 726.753 442.915 711.028 427.668 699.9L519.408 699.404C501.562 719.044 515.134 732.565 537.014 747.317Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M537.013 747.316L546.585 751.47C547.08 751.692 546.345 752.103 546.841 752.342L555.371 756.444C555.866 756.683 554.943 757.367 555.422 757.658C571.079 767.298 585.643 778.922 598.565 792.648C575.336 965.751 665.827 1157.67 475.306 1171.02C393.771 1176.75 322.339 1107.27 299.4 1026.88C295.947 1014.77 299.177 1004.35 297.536 991.271C291.263 985.305 289.297 976.673 289.109 970.725C289.075 969.545 299.912 968.434 300.545 968.588C297.622 956.247 289.981 941.564 293.109 917.172C395.874 896.455 497.681 831.569 537.013 747.316Z" fill="#EC691F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M546.619 752.324C493.51 851.55 394.865 925.855 288.904 947.358L289.109 970.724C387.242 954.828 504.877 872.934 546.619 752.324Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M555.285 757.334C499.459 879.841 403.788 966.008 292.426 992.537L299.4 1026.88C402.523 1007.27 511.407 906.233 555.285 757.334Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.7 928.691C497.836 928.691 515.784 946.639 515.784 968.792C515.784 990.928 497.836 1008.89 475.7 1008.89C453.548 1008.89 435.6 990.928 435.6 968.792C435.6 946.639 453.548 928.691 475.7 928.691Z" fill="#F8AF28" fill-opacity="0.239216"/>
+<path d="M479.974 968.637V958.005C479.974 957.424 479.752 957.117 479.324 957.082H470.47C469.94 957.082 469.667 957.39 469.667 958.005V968.637C469.667 969.253 469.94 969.56 470.47 969.56H479.188C479.718 969.56 479.974 969.253 479.974 968.637ZM479.188 976.295H470.47C469.94 976.295 469.667 976.603 469.667 977.218V980.927C469.667 981.936 469.154 982.432 468.094 982.432H463.53C462.47 982.432 461.941 981.936 461.941 980.927V958.005C461.941 957.424 461.718 957.117 461.291 957.082H457.924C456.864 957.082 456.334 956.553 456.334 955.493V951.664C456.334 950.69 456.864 950.211 457.924 950.211H492.059C493.119 950.211 493.649 950.707 493.649 951.732V955.493C493.649 956.553 493.119 957.082 492.059 957.082H488.503C487.974 957.082 487.7 957.39 487.7 958.005V989.833C487.7 990.842 487.17 991.354 486.127 991.354H481.564C480.504 991.354 479.974 990.842 479.974 989.833V977.218C479.974 976.603 479.718 976.295 479.188 976.295Z" fill="#A34E1C"/>
+<path d="M464.623 969.459H458.521C458.059 969.459 457.684 969.964 457.684 970.587V975.544C457.684 976.167 458.059 976.672 458.521 976.672H464.623C465.086 976.672 465.461 976.167 465.461 975.544V970.587C465.461 969.964 465.086 969.459 464.623 969.459Z" fill="#A34E1C"/>
+<defs>
+<linearGradient id="paint0_linear_6524_4415" x1="204.345" y1="533.701" x2="229.352" y2="438.97" gradientUnits="userSpaceOnUse">
+<stop stop-color="#374B56"/>
+<stop offset="1" stop-color="#898989"/>
+</linearGradient>
+<radialGradient id="paint1_radial_6524_4415" cx="0" cy="0" r="1" gradientTransform="matrix(124.017 4.00035 -1.33306 118.217 464.349 115.789)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#EBE3D6"/>
+<stop offset="1" stop-color="#D1D0CC"/>
+</radialGradient>
+<linearGradient id="paint2_linear_6524_4415" x1="478.435" y1="666.585" x2="475.067" y2="38.4257" gradientUnits="userSpaceOnUse">
+<stop stop-color="#828991"/>
+<stop offset="1" stop-color="#C7C7C9"/>
+</linearGradient>
+<radialGradient id="paint3_radial_6524_4415" cx="0" cy="0" r="1" gradientTransform="matrix(-2.84241 312.13 -384.583 2.19371 475.705 375.654)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7A6A48"/>
+<stop offset="0.658824" stop-color="#412C23"/>
+<stop offset="1" stop-color="#412C23"/>
+</radialGradient>
+<linearGradient id="paint4_linear_6524_4415" x1="571.78" y1="60.0655" x2="510.945" y2="403.434" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="0.211765" stop-color="white" stop-opacity="0.501961"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint5_linear_6524_4415" x1="567.986" y1="46.7843" x2="489.237" y2="616.963" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FEFEFE"/>
+<stop offset="0.25098" stop-color="#FEFEFE"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+<linearGradient id="paint6_linear_6524_4415" x1="626.153" y1="1203.16" x2="682.185" y2="829.859" gradientUnits="userSpaceOnUse">
+<stop stop-color="#757E87"/>
+<stop offset="1" stop-color="#D9DADA"/>
+</linearGradient>
+<radialGradient id="paint7_radial_6524_4415" cx="0" cy="0" r="1" gradientTransform="matrix(-4.82176 24.9087 -35.3555 -6.27467 638.383 12.0215)" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="0.160784" stop-color="#D3A856"/>
+<stop offset="0.631373" stop-color="#412C23"/>
+<stop offset="1" stop-color="#211C1E"/>
+</radialGradient>
+<linearGradient id="paint8_linear_6524_4415" x1="177.167" y1="1207.96" x2="177.492" y2="1103.16" gradientUnits="userSpaceOnUse">
+<stop stop-color="#979FA3"/>
+<stop offset="1" stop-color="#E9E4EB"/>
+</linearGradient>
+</defs>
+</svg></span>
+    <span class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">AI-Native Summer Series</span>
+    </span>
+  </a>
+  <div class="nav-right">
+    <div class="nav-progress-wrap">
+      <span class="nav-progress-label">Progress</span>
+      <div class="nav-progress-bar"><div class="nav-progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <span class="hero-badge"><span class="dot"></span>Learn by doing · No code needed</span>
+    <h1>The evaluator's eye:<br>three lenses for <em>any</em> AI output</h1>
+    <p class="hero-sub">AI writes so fluently that it's easy to be charmed by an answer that's quietly wrong, off-topic, or unusable. The fix isn't technical — it's a habit of looking through three simple lenses. You'll practise each one by grading real outputs, then meet the trick that scales it up.</p>
+    <div class="audience-row">
+      <span class="aud-chip"><span class="d"></span>Management</span>
+      <span class="aud-chip"><span class="d"></span>Social science</span>
+      <span class="aud-chip"><span class="d"></span>Engineering</span>
+      <span class="aud-chip"><span class="d"></span>Simply curious</span>
+      <span class="aud-chip"><span class="d"></span>Everyone welcome</span>
+    </div>
+  </div>
+</header>
+
+<div class="station-nav" id="stationNav">
+  <a href="#s1" data-s="s1"><span class="n">1</span> Faithfulness</a>
+  <a href="#s2" data-s="s2"><span class="n">2</span> Relevance</a>
+  <a href="#s3" data-s="s3"><span class="n">3</span> Format</a>
+  <a href="#s4" data-s="s4"><span class="n">4</span> Be the judge</a>
+</div>
+
+<!-- ===== STATION 1: FAITHFULNESS ===== -->
+<section class="station" id="s1">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">1</span>Lens one</span>
+      <h2 class="sec-title">Faithfulness — does it stay true to the input?</h2>
+      <p class="sec-intro">When AI summarises, extracts, or rewrites something, the first question is simple: <b>did it keep the facts and honour the constraints</b> from the source? This is the most important lens whenever the model is working from material you gave it. Below is a customer message and the AI's summary for the support queue. <b>Flag every sentence that drifts from the source</b>, then reveal the truth.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">support-summary — check against the source</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — click the sentences you think are wrong</span>
+        <div class="panel source">
+          <div class="panel-label">The source — what the customer actually wrote</div>
+          Hi, I ordered the blue desk lamp on the 3rd, order #4471. It arrived cracked. I do <b>not</b> want a refund — please send a <b>replacement</b> to my <b>office</b> address, not my home. I need it <b>before next Friday</b> for a presentation.
+        </div>
+        <div class="fa-out-label">The AI's summary — flag what doesn't match</div>
+        <div class="fa-sents" id="faSents"></div>
+        <div class="fa-controls">
+          <button class="btn" id="faReveal">Reveal the evaluation</button>
+          <button class="btn btn-ghost" id="faReset">Reset</button>
+        </div>
+        <div class="fa-result" id="faResult"></div>
+      </div>
+    </div>
+
+    <div class="world">
+      <div class="world-title">Where you'll meet this</div>
+      <div class="world-grid">
+        <div class="world-card"><div class="wl">Management</div><div class="wt">A meeting summary that quietly changes a decision.</div></div>
+        <div class="world-card"><div class="wl">Social science</div><div class="wt">A summary that overstates what the data actually showed.</div></div>
+        <div class="world-card"><div class="wl">Engineering</div><div class="wt">A doc rewrite that drops a critical caveat or limit.</div></div>
+        <div class="world-card"><div class="wl">Everyday</div><div class="wt">A "TL;DR" that invents a detail the article never said.</div></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">Lens one, in full</div>
+      <div class="defn-term">Faithfulness</div>
+      <p>Does the output stay true to the input? Are facts preserved? Are constraints honoured? Faithfulness is the most important lens in any setting where the model is <b>summarising, extracting, or transforming</b> source material — because a fluent summary that flips a "no refund" into a "refund" is worse than no summary at all.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATION 2: RELEVANCE ===== -->
+<section class="station" id="s2" style="background:var(--bg-light)">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">2</span>Lens two</span>
+      <h2 class="sec-title">Relevance — did it answer <em>your</em> question?</h2>
+      <p class="sec-intro">It's depressingly common for a model to give a fluent, accurate answer to a question you didn't ask. All three replies below are well-written and true — but only one actually addresses the question. <b>Pick the relevant one.</b></p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">relevance check — which reply answers the ask?</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — choose the reply that fits the question</span>
+        <div id="rlRounds"></div>
+      </div>
+    </div>
+
+    <div class="world">
+      <div class="world-title">Where you'll meet this</div>
+      <div class="world-grid">
+        <div class="world-card"><div class="wl">Management</div><div class="wt">You ask "can we afford it?" and get an essay on value.</div></div>
+        <div class="world-card"><div class="wl">Social science</div><div class="wt">You ask "what did respondents say?" and get methodology.</div></div>
+        <div class="world-card"><div class="wl">Engineering</div><div class="wt">You ask "why did it fail?" and get how the system works.</div></div>
+        <div class="world-card"><div class="wl">Everyday</div><div class="wt">You ask "is it open now?" and get the restaurant's history.</div></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">Lens two, in full</div>
+      <div class="defn-term">Relevance</div>
+      <p>Does the output actually address what was asked? Fluency and accuracy are not the same as relevance — an answer can be both polished and correct while solving the wrong problem entirely. The lens is simple to apply once you name it: <b>re-read the original ask, then check the answer against it word for word.</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATION 3: FORMAT ===== -->
+<section class="station" id="s3">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">3</span>Lens three</span>
+      <h2 class="sec-title">Format compliance — did it follow the brief?</h2>
+      <p class="sec-intro">Length, tone, sections, fields, a reference code — all of these are part of the brief, and an output that ignores the structure is <b>unusable downstream even when the content is good</b>. Here's a brief with four format rules and the AI's output. For each rule, judge it <b>Pass or Fail</b>, then reveal.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">format check — grade each rule</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — call Pass or Fail on each rule</span>
+        <div class="panel brief">
+          <div class="panel-label">The brief — the format rules</div>
+          Write a team status update following these rules:
+          <ul>
+            <li>Exactly 3 bullet points.</li>
+            <li>Each bullet under 15 words.</li>
+            <li>Each bullet starts with a label: DONE, DOING, or BLOCKED.</li>
+            <li>End with a reference code in the form REF-#### (four digits).</li>
+          </ul>
+        </div>
+        <div class="fmt-output" id="fmtOutput"></div>
+        <div class="fmt-rules" id="fmtRules"></div>
+        <div class="fmt-summary" id="fmtSummary"></div>
+      </div>
+    </div>
+
+    <div class="world">
+      <div class="world-title">Where you'll meet this</div>
+      <div class="world-grid">
+        <div class="world-card"><div class="wl">Management</div><div class="wt">A report that ignores the one-page limit you set.</div></div>
+        <div class="world-card"><div class="wl">Social science</div><div class="wt">Citations missing from a literature summary.</div></div>
+        <div class="world-card"><div class="wl">Engineering</div><div class="wt">Output that isn't valid JSON, so nothing downstream can read it.</div></div>
+        <div class="world-card"><div class="wl">Everyday</div><div class="wt">A reply that's three paragraphs when you asked for one line.</div></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">Lens three, in full</div>
+      <div class="defn-term">Format compliance</div>
+      <p>Did the output follow the structure you asked for — length, tone, sections, fields, citations? All of these are part of the brief. An output that ignores the format is <b>unusable downstream, even if the content is good</b>: a perfect answer in the wrong shape still has to be redone by hand.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATION 4: LLM-AS-JUDGE ===== -->
+<section class="station" id="s4" style="background:var(--bg-light)">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">4</span>Putting the lenses to work</span>
+      <h2 class="sec-title">Be the judge — then let an AI scale it</h2>
+      <p class="sec-intro">Now use all three lenses at once. Score the output below on each lens, then compare your verdict with an automated <b>AI judge</b> running the same rubric. That pattern is how teams check thousands of outputs a day — with one important catch you'll spot at the end.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">evaluation console — score, then compare</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — give each lens a verdict, then run the judge</span>
+        <div class="panel brief">
+          <div class="panel-label">The brief</div>
+          Summarise the refund policy below in <b>2 sentences</b>, in a <b>neutral tone</b>, with <b>no advice or opinion</b>.
+        </div>
+        <div class="panel source">
+          <div class="panel-label">The source policy</div>
+          Refunds are available within 30 days of delivery for unused items in original packaging. Shipping fees are non-refundable. Sale items are final and cannot be returned.
+        </div>
+        <div class="panel" style="background:#fff;border:1.5px solid var(--border)">
+          <div class="panel-label" style="color:var(--text-muted)">The AI's output — your output to grade</div>
+          “You can get a refund within 30 days if the item is unused and in its original box, though shipping costs aren't returned. Sale items are final — but honestly that seems unfair, so I'd push them for an exception.”
+        </div>
+        <div id="lensRows"></div>
+        <div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn" id="judgeRun" disabled>Run the AI judge &amp; compare</button>
+          <button class="btn btn-ghost" id="judgeReset">Reset</button>
+        </div>
+        <div class="judge-final" id="judgeFinal"></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">Definition</div>
+      <div class="defn-term">LLM-as-judge</div>
+      <p>A pragmatic evaluation pattern in which one AI model scores the output of another (or its own) against a rubric you design. It is <b>not a substitute for human judgement on the hardest cases</b>, but it is invaluable for scaling routine quality checks across thousands of outputs.</p>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">The whole picture</div>
+      <p>Three lenses, one habit: ask whether an output is <b>faithful</b> to its source, <b>relevant</b> to the ask, and <b>compliant</b> with the format. Run them yourself on the cases that matter, and hand the routine, high-volume checks to an AI judge — while keeping the final word, on anything genuinely ambiguous, firmly human.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CLOSING ===== -->
+<section class="closing">
+  <div class="closing-box reveal">
+    <h2>You can now grade any AI output</h2>
+    <p>No code, no jargon — just four moves you can make on anything an AI hands you:</p>
+    <div class="recap">
+      <div class="recap-item"><div class="rt">Faithfulness</div><div class="rd">Does it keep the source's facts and constraints?</div></div>
+      <div class="recap-item"><div class="rt">Relevance</div><div class="rd">Does it answer the question you actually asked?</div></div>
+      <div class="recap-item"><div class="rt">Format</div><div class="rd">Does it follow the structure the brief required?</div></div>
+      <div class="recap-item"><div class="rt">LLM-as-judge</div><div class="rd">Let an AI apply your rubric at scale — you keep the hard calls.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><b>MokshPath</b> · AI-Native Summer Series · A hands-on companion to your reading — built for every background. Now go grade something real.</p>
+</footer>
+
+<script>
+/* ============================================================
+   PROGRESS TRACKER (defined first so init code can call it)
+   ============================================================ */
+const doneSet = new Set();
+function markDone(id){
+  if(doneSet.has(id)) return;
+  doneSet.add(id);
+  const pct = Math.round(doneSet.size/4*100);
+  const fill = document.getElementById('progressFill');
+  if(fill) fill.style.width = pct+'%';
+}
+
+/* ============================================================
+   1 · FAITHFULNESS — spot the drift
+   ============================================================ */
+const FA=[
+  {tx:'The customer’s blue desk lamp (order #4471) arrived cracked.', drift:false, why:'Faithful — blue desk lamp, order #4471, arrived cracked, all match the source.'},
+  {tx:'They are requesting a full refund.', drift:true, why:'Drift — the customer explicitly said they do NOT want a refund. This states the opposite.'},
+  {tx:'The replacement should be sent to their home address.', drift:true, why:'Drift — they asked for the replacement at their office, not home. A flipped constraint.'},
+  {tx:'They need it within two weeks.', drift:true, why:'Drift — they said “before next Friday”. “Two weeks” quietly changes the deadline.'},
+  {tx:'The lamp was ordered on the 3rd.', drift:false, why:'Faithful — matches the source exactly.'}
+];
+const faSents=document.getElementById('faSents');
+const faResult=document.getElementById('faResult');
+let faRevealed=false;
+function faRender(){
+  faSents.innerHTML=''; faRevealed=false; faResult.className='fa-result';
+  FA.forEach((s,i)=>{
+    const b=document.createElement('button'); b.className='fa-sent'; b.dataset.i=i;
+    b.innerHTML=`<span class="fa-mark">!</span><span class="fa-tx">${s.tx}<span class="fa-why"></span></span>`;
+    b.addEventListener('click',()=>{ if(faRevealed) return; b.classList.toggle('flagged'); });
+    faSents.appendChild(b);
+  });
+  document.getElementById('faReveal').disabled=false;
+}
+document.getElementById('faReveal').addEventListener('click',()=>{
+  if(faRevealed) return; faRevealed=true;
+  let caught=0, wrong=0; const totalDrift=FA.filter(s=>s.drift).length;
+  faSents.querySelectorAll('.fa-sent').forEach(b=>{
+    const i=+b.dataset.i, s=FA[i], flagged=b.classList.contains('flagged');
+    b.classList.add('revealed', s.drift?'true-drift':'true-faithful');
+    b.querySelector('.fa-mark').textContent = s.drift?'✕':'✓';
+    b.querySelector('.fa-why').innerHTML='<br>'+s.why;
+    if(s.drift && flagged) caught++;
+    if(!s.drift && flagged) wrong++;
+  });
+  faResult.classList.add('show', (caught===totalDrift&&wrong===0)?'good':'mid');
+  let msg;
+  if(caught===totalDrift&&wrong===0) msg=`<b>Perfect read.</b> You caught all ${totalDrift} faithfulness breaks and didn’t over-flag. That summary would have to go back for a fix before it’s usable.`;
+  else msg=`You caught <b>${caught} of ${totalDrift}</b> real drifts${wrong?`, and flagged ${wrong} sentence(s) that were actually faithful`:''}. The three drifts all changed a fact or a constraint — exactly what this lens is for.`;
+  faResult.innerHTML=msg;
+  document.getElementById('faReveal').disabled=true;
+  markDone('s1');
+});
+document.getElementById('faReset').addEventListener('click',faRender);
+faRender();
+
+/* ============================================================
+   2 · RELEVANCE — pick the reply that answers the ask
+   ============================================================ */
+const RL=[
+  {
+    q:'Can we afford to hire two more analysts this quarter?',
+    options:[
+      {t:'Analysts turn raw data into decisions and usually pay for themselves through sharper forecasting and fewer costly mistakes.', good:false, tag:'On-topic, wrong question', why:'Accurate and fluent — but it argues why analysts are valuable, not whether you can afford two this quarter.'},
+      {t:'Yes — two analyst salaries fit within this quarter’s remaining people budget, leaving a small buffer.', good:true, tag:'Answers the ask', why:'Directly addresses affordability, this quarter. That is relevance.'},
+      {t:'Hiring two engineers would stretch the budget, so you might phase them across two quarters.', good:false, tag:'Different question', why:'Fluent and sensible — but about engineers, not the analysts you asked about.'}
+    ]
+  },
+  {
+    q:'What time zone is our client in, so I can schedule the call?',
+    options:[
+      {t:'When scheduling across regions, pick a slot that’s reasonable for both sides and confirm it in writing.', good:false, tag:'Helpful, not the ask', why:'Good general advice, but it never tells you the client’s time zone.'},
+      {t:'The client usually prefers afternoon meetings.', good:false, tag:'Related, not the ask', why:'Useful context — but not the time zone you actually asked for.'},
+      {t:'Your client is in US Eastern Time (UTC−5).', good:true, tag:'Answers the ask', why:'Exactly the fact requested. Short, and relevant.'}
+    ]
+  }
+];
+const rlRounds=document.getElementById('rlRounds');
+let rlIdx=0, rlScore=0;
+function rlBuild(){
+  rlRounds.innerHTML='';
+  RL.forEach((r,ri)=>{
+    const round=document.createElement('div'); round.className='rl-round'+(ri===0?' active':''); round.dataset.i=ri;
+    let opts='';
+    r.options.forEach((o,oi)=>{ opts+=`<button class="opt" data-ri="${ri}" data-oi="${oi}">${o.t}<span class="why"></span></button>`; });
+    round.innerHTML=`
+      <div class="opt-q">
+        <div class="qa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg></div>
+        <div class="qb"><span class="who">The question asked</span>${r.q}</div>
+      </div>
+      <div class="opts">${opts}</div>
+      <div class="next-row">
+        <span class="rl-feedback" data-fb="${ri}"></span>
+        <button class="btn" data-next="${ri}" style="display:none">${ri<RL.length-1?'Next question →':'Done'}</button>
+      </div>`;
+    rlRounds.appendChild(round);
+  });
+  rlRounds.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',rlPick));
+  rlRounds.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',rlNext));
+}
+function rlPick(e){
+  const b=e.currentTarget; const ri=+b.dataset.ri, oi=+b.dataset.oi;
+  const round=rlRounds.querySelector(`.rl-round[data-i="${ri}"]`);
+  if(round.dataset.done) return; round.dataset.done='1';
+  const r=RL[ri];
+  round.querySelectorAll('.opt').forEach(opt=>{
+    const o=r.options[+opt.dataset.oi];
+    opt.classList.add('revealed', o.good?'reveal-good':'reveal-bad'); opt.disabled=true;
+    opt.insertAdjacentHTML('afterbegin',`<span class="vt">${o.tag}</span><br>`);
+    opt.querySelector('.why').textContent=o.why;
+  });
+  const chosen=r.options[oi]; const fb=round.querySelector(`[data-fb="${ri}"]`);
+  if(chosen.good){ rlScore++; fb.className='rl-feedback good'; fb.textContent='✓ Relevant — it answers exactly what was asked.'; }
+  else { fb.className='rl-feedback bad'; fb.textContent='✕ Fluent, but it doesn’t answer the question. See the green one.'; }
+  const next=round.querySelector(`[data-next="${ri}"]`); if(next) next.style.display='inline-flex';
+  markDone('s2');
+}
+function rlNext(e){
+  const ri=+e.currentTarget.dataset.next;
+  if(ri>=RL.length-1) return;
+  rlRounds.querySelector(`.rl-round[data-i="${ri}"]`).classList.remove('active');
+  const nx=rlRounds.querySelector(`.rl-round[data-i="${ri+1}"]`);
+  if(nx){ nx.classList.add('active'); nx.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+}
+rlBuild();
+
+/* ============================================================
+   3 · FORMAT — grade each rule
+   ============================================================ */
+const FMT_OUTPUT=
+`• DONE: Shipped the new onboarding flow to production this morning.
+• DOING: Reviewing the analytics to confirm the signup funnel improved as expected over the past several days and weeks.
+• Need design's help on the empty-state screens.
+Ref: 4471`;
+const FMT_RULES=[
+  {rule:'Exactly 3 bullet points.', pass:true, ev:'There are exactly three bullets — this one passes.'},
+  {rule:'Each bullet under 15 words.', pass:false, ev:'The second bullet runs to about 18 words, over the 15-word limit.'},
+  {rule:'Each bullet starts with a label (DONE / DOING / BLOCKED).', pass:false, ev:'The third bullet has no label — it should begin with BLOCKED.'},
+  {rule:'Ends with a reference code in the form REF-#### .', pass:false, ev:'It ends with “Ref: 4471”, not the required format “REF-4471”.'}
+];
+document.getElementById('fmtOutput').textContent=FMT_OUTPUT;
+const fmtRules=document.getElementById('fmtRules');
+let fmtDone=0, fmtRight=0;
+function fmtBuild(){
+  fmtRules.innerHTML='';
+  FMT_RULES.forEach((r,i)=>{
+    const d=document.createElement('div'); d.className='fmt-rule'; d.dataset.i=i;
+    d.innerHTML=`<div class="rh"><span class="rtx">${r.rule}</span>
+      <span class="rbtns"><button class="rb" data-i="${i}" data-v="pass">Pass</button><button class="rb" data-i="${i}" data-v="fail">Fail</button></span></div>
+      <div class="rverdict"></div>`;
+    fmtRules.appendChild(d);
+  });
+  fmtRules.querySelectorAll('.rb').forEach(b=>b.addEventListener('click',fmtJudge));
+}
+function fmtJudge(e){
+  const i=+e.currentTarget.dataset.i, v=e.currentTarget.dataset.v;
+  const row=fmtRules.querySelector(`.fmt-rule[data-i="${i}"]`);
+  if(row.classList.contains('done')) return;
+  row.classList.add('done');
+  const r=FMT_RULES[i];
+  const userPass=(v==='pass'); const correct=(userPass===r.pass);
+  row.querySelectorAll('.rb').forEach(btn=>{
+    btn.disabled=true;
+    if(btn.dataset.v==='pass'&&r.pass) btn.classList.add('pick-pass');
+    if(btn.dataset.v==='fail'&&!r.pass) btn.classList.add('pick-fail');
+  });
+  row.classList.add(correct?'correct':'wrong');
+  const truth = r.pass?'<span style="color:var(--green-dark);font-weight:800">PASS</span>':'<span style="color:var(--red);font-weight:800">FAIL</span>';
+  row.querySelector('.rverdict').innerHTML=`<span class="vlabel">${correct?'Correct.':'Not quite.'}</span> Actual verdict: ${truth}. ${r.ev}`;
+  fmtDone++; if(correct) fmtRight++;
+  if(fmtDone===FMT_RULES.length){
+    const passes=FMT_RULES.filter(x=>x.pass).length;
+    const sum=document.getElementById('fmtSummary');
+    sum.classList.add('show');
+    sum.innerHTML=`<b>${passes} of 4 rules passed.</b> You judged ${fmtRight} of 4 correctly. The content is perfectly sensible — but because the format breaks, this update can’t drop straight into the channel. <b>Good content in the wrong shape is still a redo.</b>`;
+  }
+  markDone('s3');
+}
+fmtBuild();
+
+/* ============================================================
+   4 · LLM-AS-JUDGE — score, then compare
+   ============================================================ */
+const LENSES=[
+  {name:'Faithfulness', sub:'Are the source’s facts kept?', judge:'pass',
+   note:'The factual summary is accurate — 30 days, unused, original packaging, shipping non-refundable, sale items final are all preserved.'},
+  {name:'Relevance', sub:'Does it summarise the policy as asked?', judge:'pass',
+   note:'Yes — it does summarise the refund policy that was requested.'},
+  {name:'Format & constraints', sub:'2 sentences, neutral, no advice?', judge:'fail',
+   note:'Fails the brief: “honestly that seems unfair, so I’d push them for an exception” is opinion and advice, and the tone isn’t neutral. Content fine; constraints broken.'}
+];
+const lensRows=document.getElementById('lensRows');
+let lensPicked={};
+function lensBuild(){
+  lensRows.innerHTML=''; lensPicked={};
+  LENSES.forEach((L,i)=>{
+    const row=document.createElement('div'); row.className='lens-row'; row.dataset.i=i;
+    row.innerHTML=`<div class="lens-top">
+        <div class="lens-name">${L.name}<span>${L.sub}</span></div>
+        <div class="lens-btns">
+          <button class="lens-btn" data-i="${i}" data-v="pass">Pass</button>
+          <button class="lens-btn" data-i="${i}" data-v="partial">Partial</button>
+          <button class="lens-btn" data-i="${i}" data-v="fail">Fail</button>
+        </div>
+      </div>
+      <div class="lens-judge"></div>`;
+    lensRows.appendChild(row);
+  });
+  lensRows.querySelectorAll('.lens-btn').forEach(b=>b.addEventListener('click',lensPick));
+  document.getElementById('judgeRun').disabled=true;
+  document.getElementById('judgeFinal').className='judge-final';
+}
+function lensPick(e){
+  const i=+e.currentTarget.dataset.i, v=e.currentTarget.dataset.v;
+  const row=lensRows.querySelector(`.lens-row[data-i="${i}"]`);
+  if(row.classList.contains('judged')) return;
+  row.querySelectorAll('.lens-btn').forEach(b=>b.classList.remove('sel-pass','sel-partial','sel-fail'));
+  e.currentTarget.classList.add('sel-'+v);
+  lensPicked[i]=v;
+  if(Object.keys(lensPicked).length===LENSES.length) document.getElementById('judgeRun').disabled=false;
+}
+document.getElementById('judgeRun').addEventListener('click',()=>{
+  let agreements=0;
+  LENSES.forEach((L,i)=>{
+    const row=lensRows.querySelector(`.lens-row[data-i="${i}"]`);
+    row.classList.add('judged');
+    row.querySelectorAll('.lens-btn').forEach(b=>b.disabled=true);
+    const mine=lensPicked[i]; const agree=(mine===L.judge);
+    if(agree) agreements++;
+    const agreeTxt = agree
+      ? '<span class="agree" style="color:var(--green-dark)">— you agreed</span>'
+      : `<span class="agree" style="color:var(--amber-dark)">— you said “${mine}”</span>`;
+    row.querySelector('.lens-judge').innerHTML=`<span class="jverdict ${L.judge}">AI judge: ${L.judge}</span>${agreeTxt}<br>${L.note}`;
+  });
+  const f=document.getElementById('judgeFinal');
+  f.className='judge-final show insight'; f.style.marginTop='1.2rem';
+  f.innerHTML=`<div class="insight-label">Verdict: needs a rewrite</div>
+    <p>You and the AI judge agreed on <b>${agreements} of 3</b> lenses. The judge’s overall call: <b>reject</b> — the summary is faithful and relevant, but it smuggled in advice and lost the neutral tone the brief required. An AI judge can flag exactly this, on thousands of outputs an hour. The catch: on the genuinely <b>borderline</b> cases — is one wry aside really “advice”? — a <b>human</b> still makes the final call. That’s why LLM-as-judge scales the routine checks, not the hard ones.</p>`;
+  document.getElementById('judgeRun').disabled=true;
+  markDone('s4');
+});
+document.getElementById('judgeReset').addEventListener('click',lensBuild);
+lensBuild();
+
+/* ============================================================
+   SCROLL REVEAL + STATION NAV
+   ============================================================ */
+const io=new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); },{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+const navLinks=document.querySelectorAll('.station-nav a');
+const sections=[...document.querySelectorAll('section.station')];
+const navIO=new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ navLinks.forEach(a=>a.classList.toggle('active',a.dataset.s===e.target.id)); } }); },{rootMargin:'-45% 0px -50% 0px'});
+sections.forEach(s=>navIO.observe(s));
+</script>
+</body>
+</html>

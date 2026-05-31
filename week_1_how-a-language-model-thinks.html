@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How a Language Model Thinks — a hands-on playground</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--green-dark:#388E3C;
+  --red:#D64545;--red-light:#FBEAEA;--amber:#E8A040;--amber-light:#FBF1E2;--amber-dark:#B57717;
+  --blue:#4285F4;--blue-light:#E8F0FE;--teal:#0FA3A3;--purple:#9C5BD6;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);--shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+::selection{background:var(--orange);color:#fff}
+
+/* TOP BAR + NAV */
+.top-bar{background:var(--navy-dark);padding:.45rem 2rem;display:flex;justify-content:center;gap:.5rem;align-items:center;font-size:.72rem;color:rgba(255,255,255,0.7);font-weight:500;letter-spacing:.03em;text-align:center}
+.top-bar b{color:var(--orange-light);font-weight:700}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;height:70px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.1}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.18rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.6rem;color:var(--text-muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.logo-mark{display:block}
+.logo-mark svg{height:48px;width:auto;display:block;filter:drop-shadow(0 3px 6px rgba(43,45,66,.12))}
+.nav-right{display:flex;align-items:center;gap:1.2rem}
+.nav-progress-wrap{display:flex;align-items:center;gap:.6rem}
+.nav-progress-label{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.nav-progress-bar{width:130px;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.nav-progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--green));border-radius:4px;transition:width .5s cubic-bezier(.25,.46,.45,.94)}
+
+/* HERO */
+.hero{padding:4.5rem 2rem 3rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-120px;right:-80px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,var(--orange-glow),transparent 70%);z-index:0}
+.hero::after{content:'';position:absolute;bottom:-100px;left:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(66,133,244,0.07),transparent 70%);z-index:0}
+.hero-inner{max-width:1000px;margin:0 auto;position:relative;z-index:2;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.42rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1.3rem;animation:fadeUp .7s ease}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.2rem,5vw,3.5rem);line-height:1.1;color:var(--navy);margin-bottom:1.1rem;animation:fadeUp .7s ease .08s both}
+.hero h1 em{font-style:italic;color:var(--orange)}
+.hero-sub{font-size:1.05rem;color:var(--text-secondary);line-height:1.7;max-width:640px;margin:0 auto 1.6rem;animation:fadeUp .7s ease .16s both}
+.audience-row{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;animation:fadeUp .7s ease .24s both}
+.aud-chip{font-size:.72rem;font-weight:600;color:var(--text-secondary);background:var(--bg-card);border:1.5px solid var(--border);border-radius:50px;padding:.4rem .9rem;display:inline-flex;align-items:center;gap:.4rem}
+.aud-chip .d{width:7px;height:7px;border-radius:50%}
+.aud-chip:nth-child(1) .d{background:var(--orange)}.aud-chip:nth-child(2) .d{background:var(--teal)}
+.aud-chip:nth-child(3) .d{background:var(--blue)}.aud-chip:nth-child(4) .d{background:var(--purple)}
+.aud-chip:nth-child(5) .d{background:var(--green)}
+
+/* STATION NAV */
+.station-nav{position:sticky;top:70px;z-index:90;background:var(--bg-light);border-bottom:1px solid var(--border);padding:.7rem 1rem;display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;box-shadow:var(--shadow-sm)}
+.station-nav a{text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border-radius:50px;font-size:.78rem;font-weight:600;color:var(--text-secondary);background:var(--bg-card);border:1.5px solid var(--border);transition:all .2s;white-space:nowrap}
+.station-nav a:hover{border-color:var(--orange);color:var(--orange)}
+.station-nav a.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.station-nav a .n{font-family:'DM Serif Display',serif;opacity:.7}
+
+/* SECTIONS */
+section.station{padding:4rem 2rem;scroll-margin-top:140px}
+.container{max-width:920px;margin:0 auto}
+.sec-head{margin-bottom:2rem}
+.sec-kicker{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:.7rem}
+.sec-kicker .num{font-family:'DM Serif Display',serif;width:30px;height:30px;border-radius:50%;background:var(--orange-glow);display:flex;align-items:center;justify-content:center;font-size:.95rem;color:var(--orange)}
+.sec-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,3vw,2.2rem);color:var(--navy);line-height:1.2;margin-bottom:.6rem}
+.sec-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:700px}
+.sec-intro b{color:var(--text-primary);font-weight:700}
+
+.lab{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;margin-top:1.8rem}
+.lab-bar{background:var(--bg-light);border-bottom:1px solid var(--border);padding:.7rem 1.2rem;display:flex;align-items:center;gap:.5rem}
+.lab-dots{display:flex;gap:.35rem}
+.lab-dots span{width:10px;height:10px;border-radius:50%}
+.lab-dots span:nth-child(1){background:#ff5f57}.lab-dots span:nth-child(2){background:#febc2e}.lab-dots span:nth-child(3){background:#28c840}
+.lab-bar-title{font-size:.74rem;font-weight:600;color:var(--text-muted);font-family:'DM Serif Display',serif;letter-spacing:.02em}
+.lab-body{padding:1.6rem}
+.try-tag{display:inline-flex;align-items:center;gap:.35rem;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--green-dark);background:var(--green-light);padding:.28rem .7rem;border-radius:50px;margin-bottom:1rem}
+
+/* DEFINITION */
+.defn{background:var(--bg-light);border-left:3px solid var(--orange);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-top:1.6rem}
+.defn .defn-label{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:.35rem}
+.defn .defn-term{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.3rem}
+.defn p{font-size:.84rem;color:var(--text-secondary);line-height:1.65}
+.defn p b{color:var(--text-primary)}
+
+/* IN YOUR WORLD strip */
+.world{margin-top:1.4rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.3rem}
+.world-title{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.9rem}
+.world-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+.world-card{border-radius:var(--radius-sm);padding:.75rem .85rem;background:var(--bg-light);border-top:3px solid var(--orange)}
+.world-card:nth-child(2){border-top-color:var(--teal)}.world-card:nth-child(3){border-top-color:var(--blue)}.world-card:nth-child(4){border-top-color:var(--purple)}
+.world-card .wl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-muted);margin-bottom:.25rem}
+.world-card .wt{font-size:.78rem;color:var(--text-primary);line-height:1.45}
+
+button{font-family:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.65rem 1.4rem;border-radius:10px;font-size:.85rem;font-weight:600;border:none;background:var(--orange);color:#fff;transition:all .2s}
+.btn:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,122,46,0.3)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}
+.btn-ghost:hover{background:transparent;border-color:var(--orange);color:var(--orange);box-shadow:none}
+.txt-input{width:100%;padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;font-family:inherit;background:var(--bg-light);color:var(--navy);transition:border-color .2s}
+.txt-input:focus{outline:none;border-color:var(--orange);background:#fff;box-shadow:0 0 0 3px var(--orange-glow)}
+.preset-row{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:1rem}
+.preset{padding:.4rem .85rem;border-radius:50px;font-size:.75rem;font-weight:600;border:1.5px solid var(--border);background:var(--bg-light);color:var(--text-secondary);transition:all .2s}
+.preset:hover{border-color:var(--orange);color:var(--orange)}
+.preset.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+/* ===== 1. PREDICTION ===== */
+.pred-stem{font-size:1.2rem;line-height:1.8;color:var(--navy);font-weight:500;padding:1rem 1.2rem;background:var(--bg-light);border-radius:var(--radius-sm);margin-bottom:1rem;min-height:64px}
+.pred-stem .tok{display:inline-block;padding:.05rem .25rem;border-radius:5px;animation:popIn .3s ease}
+.pred-stem .tok.fresh{background:var(--orange-glow);color:var(--orange-dark);font-weight:700}
+.pred-cursor{display:inline-block;width:3px;height:1.1em;background:var(--orange);vertical-align:middle;animation:blink 1s step-end infinite;margin-left:2px}
+.pred-guess-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.pred-guess-row .txt-input{flex:1;min-width:160px}
+.pred-cands{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.cand{display:grid;grid-template-columns:120px 1fr 50px;align-items:center;gap:.7rem;font-size:.85rem;animation:popIn .3s ease}
+.cand-word{font-weight:600;color:var(--navy);text-align:right;font-family:'DM Serif Display',serif}
+.cand-word.match{color:var(--green-dark)}
+.cand-bar-track{height:22px;background:var(--bg-light);border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.cand-bar{height:100%;border-radius:6px;width:0;transition:width .6s cubic-bezier(.25,.46,.45,.94);background:linear-gradient(90deg,var(--orange-light),var(--orange))}
+.cand.top .cand-bar{background:linear-gradient(90deg,var(--orange),var(--orange-dark))}
+.cand.dim .cand-bar{background:linear-gradient(90deg,#c9cdd6,#aab0bd)}
+.cand.match .cand-bar{background:linear-gradient(90deg,var(--green-light),var(--green))}
+.cand-pct{font-size:.78rem;font-weight:700;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.pred-controls{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.pred-note{font-size:.82rem;color:var(--text-secondary);margin-top:.8rem;line-height:1.5;min-height:1.2em}
+.pred-note.win{color:var(--green-dark);font-weight:600}
+
+/* ===== 2. TOKENS ===== */
+.tk-out{margin-top:1rem;padding:1.1rem;background:var(--bg-light);border-radius:var(--radius-sm);min-height:56px;line-height:2.3}
+.tk-chip{display:inline-block;padding:.2rem .45rem;margin:.15rem .1rem;border-radius:6px;font-size:.84rem;font-weight:600;font-family:ui-monospace,'SF Mono',Menlo,monospace;animation:popIn .25s ease}
+.tk-chip.space{opacity:.45;font-style:italic;background:transparent!important}
+.tk-stats{display:flex;gap:.8rem;margin-top:1.1rem;flex-wrap:wrap}
+.tk-stat{flex:1;min-width:110px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.9rem 1rem;text-align:center}
+.tk-stat .v{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--orange);line-height:1}
+.tk-stat .l{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600;margin-top:.3rem}
+.tk-stat.ratio .v{color:var(--green-dark)}
+.tk-demo{margin-top:1.3rem;border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:1.1rem}
+.tk-demo h5{font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:.7rem}
+.tk-demo-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem}
+.tk-letters{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:1.3rem;letter-spacing:.15em;margin-top:.6rem}
+.tk-letters .r{background:var(--orange);color:#fff;border-radius:4px;padding:0 .15rem}
+.tk-demo-msg{font-size:.84rem;line-height:1.55;margin-top:.6rem}
+.tk-demo-msg.guess{color:var(--red)}
+.tk-demo-msg.truth{color:var(--green-dark);font-weight:600}
+
+/* ===== 3. CONTEXT WINDOW ===== */
+.cw-slider-label{display:flex;justify-content:space-between;font-size:.74rem;font-weight:600;color:var(--text-secondary);margin-bottom:.4rem}
+.cw-slider-label b{color:var(--orange);font-size:.95rem;font-family:'DM Serif Display',serif}
+input[type=range]{-webkit-appearance:none;width:100%;height:7px;border-radius:5px;background:var(--border);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);cursor:pointer;border:3px solid #fff;box-shadow:0 2px 6px rgba(232,122,46,.4)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--orange);cursor:pointer;border:3px solid #fff;box-shadow:0 2px 6px rgba(232,122,46,.4)}
+.cw-desk{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin:1.1rem 0}
+.cw-msg{padding:.65rem 1rem;border-bottom:1px solid var(--border);font-size:.83rem;display:flex;gap:.7rem;align-items:flex-start;transition:all .4s;background:var(--bg-card)}
+.cw-msg:last-child{border-bottom:none}
+.cw-msg .who{flex-shrink:0;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:.18rem .5rem;border-radius:5px;margin-top:.1rem;min-width:54px;text-align:center}
+.cw-msg .who.u{background:var(--orange-glow);color:var(--orange-dark)}
+.cw-msg .who.a{background:var(--blue-light);color:var(--blue)}
+.cw-msg.out{background:repeating-linear-gradient(45deg,#f2f2f2,#f2f2f2 8px,#ececec 8px,#ececec 16px);opacity:.55}
+.cw-msg.out .tx,.cw-msg.out .who{color:var(--text-muted)}
+.cw-msg.out .who{background:#e0e0e0}
+.cw-ask{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.cw-ask select{padding:.6rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.82rem;background:var(--bg-light);color:var(--navy);cursor:pointer}
+.cw-ask select:focus{outline:none;border-color:var(--orange)}
+.cw-reply{padding:1rem 1.1rem;border-radius:var(--radius-sm);font-size:.86rem;line-height:1.6;display:none;animation:popIn .3s ease}
+.cw-reply.ok{display:block;background:var(--green-light);border-left:3px solid var(--green);color:var(--green-dark)}
+.cw-reply.lost{display:block;background:var(--red-light);border-left:3px solid var(--red);color:var(--red)}
+.cw-reply b{font-weight:800}
+
+/* ===== 4. TEMPERATURE ===== */
+.tmp-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+.tmp-gauge{height:10px;border-radius:6px;background:linear-gradient(90deg,#4285F4,var(--green),#FECC00,var(--orange),var(--red));margin:.5rem 0 1rem;position:relative}
+.tmp-gauge .knob{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--navy);transform:translate(-50%,-50%);transition:left .12s;box-shadow:var(--shadow-sm)}
+.tmp-mood{font-size:.78rem;font-weight:700;padding:.4rem .8rem;border-radius:50px;display:inline-block;margin-bottom:.8rem;transition:all .3s}
+.tmp-prompt{background:var(--bg-light);border-radius:var(--radius-sm);padding:.9rem 1rem;font-size:.84rem;color:var(--text-secondary);margin-bottom:1rem;border-left:3px solid var(--navy)}
+.tmp-prompt b{color:var(--navy)}
+.tmp-right{background:var(--navy-dark);border-radius:var(--radius-sm);padding:1.2rem;display:flex;flex-direction:column}
+.tmp-right h5{color:rgba(255,255,255,.55);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:.8rem}
+.tmp-outputs{flex:1;display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;min-height:120px}
+.tmp-output{background:rgba(255,255,255,.06);border-radius:8px;padding:.7rem .85rem;font-size:.86rem;color:#fff;line-height:1.4;animation:popIn .3s ease;border-left:2px solid var(--orange)}
+.tmp-output.empty{color:rgba(255,255,255,.4);font-style:italic;border-left-color:rgba(255,255,255,.15);text-align:center}
+.tmp-consistency{font-size:.72rem;color:rgba(255,255,255,.6);text-align:center;line-height:1.4}
+.tmp-consistency b{color:var(--orange-light)}
+.tmp-guide{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.2rem}
+.tmp-guide-card{border-radius:var(--radius-sm);padding:.9rem 1rem;font-size:.8rem;line-height:1.5}
+.tmp-guide-card.down{background:var(--blue-light);border-left:3px solid var(--blue)}
+.tmp-guide-card.up{background:var(--amber-light);border-left:3px solid var(--amber)}
+.tmp-guide-card .gt{font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem}
+.tmp-guide-card.down .gt{color:var(--blue)}.tmp-guide-card.up .gt{color:var(--amber-dark)}
+
+/* INSIGHT + CLOSING */
+.insight{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.2rem;margin-top:2rem;position:relative;overflow:hidden}
+.insight::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;border-radius:50%;background:rgba(232,122,46,.1)}
+.insight-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--orange-light);margin-bottom:.6rem;position:relative;z-index:1}
+.insight p{color:rgba(255,255,255,.85);font-size:1rem;line-height:1.7;position:relative;z-index:1}
+.insight p b{color:#fff}
+.closing{text-align:center;padding:4rem 2rem}
+.closing-box{max-width:760px;margin:0 auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:2.8rem 2.2rem;box-shadow:var(--shadow-md)}
+.closing-box h2{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,3vw,2rem);color:var(--navy);margin-bottom:.8rem}
+.closing-box>p{color:var(--text-secondary);font-size:.95rem;margin-bottom:1.8rem;line-height:1.7}
+.recap{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;text-align:left}
+.recap-item{background:var(--bg-light);border-radius:var(--radius-sm);padding:.9rem 1rem;border-top:3px solid var(--orange)}
+.recap-item:nth-child(2){border-top-color:var(--teal)}.recap-item:nth-child(3){border-top-color:var(--blue)}.recap-item:nth-child(4){border-top-color:var(--amber)}
+.recap-item .rt{font-family:'DM Serif Display',serif;font-size:.9rem;color:var(--navy);margin-bottom:.2rem}
+.recap-item .rd{font-size:.72rem;color:var(--text-secondary);line-height:1.5}
+footer{background:var(--bg-card);border-top:1px solid var(--border);padding:1.8rem 2rem;text-align:center}
+footer p{font-size:.76rem;color:var(--text-muted)}
+footer b{color:var(--orange)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
+@keyframes blink{50%{opacity:0}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+@media(max-width:760px){
+  .nav-progress-bar{width:80px}
+  .tmp-wrap,.tmp-guide{grid-template-columns:1fr}
+  .world-grid{grid-template-columns:1fr 1fr}
+  .recap{grid-template-columns:1fr 1fr}
+  .cand{grid-template-columns:84px 1fr 42px}
+  .nav-logo-tag{display:none}
+  section.station{padding:3rem 1.2rem}
+  .top-bar{font-size:.66rem}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">No code. No jargon. Just four little experiments that reveal <b>how the machine behind every AI chat actually thinks</b>.</div>
+
+<nav class="nav">
+  <a class="nav-logo" href="#top">
+    <span class="logo-mark"><svg viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M493.477 314.275H460.795C456.99 314.275 453.906 317.356 453.906 321.155C453.906 324.955 456.99 328.035 460.795 328.035H493.477C497.282 328.035 500.366 324.955 500.366 321.155C500.366 317.356 497.282 314.275 493.477 314.275Z" fill="#EF7F1A"/>
+<path d="M493.477 333.881H460.795C456.99 333.881 453.906 336.961 453.906 340.761C453.906 344.561 456.99 347.641 460.795 347.641H493.477C497.282 347.641 500.366 344.561 500.366 340.761C500.366 336.961 497.282 333.881 493.477 333.881Z" fill="#EF7F1A"/>
+<path d="M493.477 353.486H460.795C456.99 353.486 453.906 356.567 453.906 360.366C453.906 364.166 456.99 367.246 460.795 367.246H493.477C497.282 367.246 500.366 364.166 500.366 360.366C500.366 356.567 497.282 353.486 493.477 353.486Z" fill="#EF7F1A"/>
+<path d="M660.991 1316.23H299.4V1478.7H660.991V1316.23Z" fill="#2F1D19"/>
+<path d="M660.991 1016.12H299.4V1178.6H660.991V1016.12Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.306 739.607C504.655 739.607 531.748 746.804 555.61 759.624C543.303 777.076 512.159 789.468 475.682 789.468C439 789.468 407.702 776.939 395.549 759.333C419.257 746.684 446.179 739.607 475.306 739.607Z" fill="#D9DADA"/>
+<path d="M740.832 490.575C778.018 490.575 808.162 454.086 808.162 409.075C808.162 364.063 778.018 327.574 740.832 327.574C703.647 327.574 673.502 364.063 673.502 409.075C673.502 454.086 703.647 490.575 740.832 490.575Z" fill="#D9DADA"/>
+<path d="M210.549 490.575C247.734 490.575 277.879 454.086 277.879 409.075C277.879 364.063 247.734 327.574 210.549 327.574C173.364 327.574 143.219 364.063 143.219 409.075C143.219 454.086 173.364 490.575 210.549 490.575Z" fill="#D9DADA"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M145.1 428.27C152.227 464.011 178.825 490.574 210.55 490.574C242.275 490.574 268.872 464.011 276 428.27C258.017 438.645 235.284 444.85 210.55 444.85C185.816 444.85 163.065 438.645 145.1 428.27Z" fill="url(#paint0_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.7 57.6211C652.854 57.6211 759.123 184.726 759.123 355.488C759.123 526.249 699.228 703.848 475.7 703.848C252.154 703.848 192.26 526.249 192.26 355.488C192.26 184.726 298.545 57.6211 475.7 57.6211Z" fill="url(#paint1_radial_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M690.083 149.617C734.816 202.179 759.123 273.834 759.123 355.488C759.123 526.249 699.228 703.848 475.7 703.848C252.154 703.848 192.26 526.249 192.26 355.488C192.26 280.244 212.891 213.495 251.129 162.352C239.864 193.872 233.642 228.349 233.642 264.467C233.642 414.579 340.834 536.283 473.05 536.283C605.283 536.283 712.475 414.579 712.475 264.467C712.475 223.426 704.441 184.504 690.083 149.617Z" fill="url(#paint2_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M477.546 168.932C633.402 168.932 709.638 238.108 712.834 376.067C716.031 514.01 666.136 618.313 477.546 618.313C288.973 618.313 237.164 528.095 238.429 376.067C239.711 224.04 321.707 168.932 477.546 168.932Z" fill="url(#paint3_radial_6524_4415)"/>
+<mask id="mask0_6524_4415" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="377" y="168" width="326" height="451">
+<path d="M702.612 168.334H377.379V618.826H702.612V168.334Z" fill="url(#paint4_linear_6524_4415)"/>
+</mask>
+<g mask="url(#mask0_6524_4415)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M501.254 169.514C623.505 177.445 698.219 241.715 701.347 376.068C704.458 510.421 616.377 617.647 502.861 617.647C389.362 617.647 406.335 614.553 378.559 607.288C483.22 592.383 564.447 484.063 564.447 352.633C564.447 280.893 540.243 216.059 501.254 169.514Z" fill="url(#paint5_linear_6524_4415)"/>
+</g>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M747.755 475.072C721.756 600.178 646.478 703.848 475.699 703.848C304.904 703.848 229.642 600.178 203.626 475.072H202.84C230.668 592.793 315.672 664.26 473.306 667.884C628.444 671.439 717.517 588.212 747.499 475.072H747.755Z" fill="#898989"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M426.283 434.613C416.284 443.092 403.344 448.202 389.208 448.202C375.072 448.202 362.132 443.092 352.133 434.613H426.283Z" fill="#008DD2"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M602.086 434.613C592.087 443.092 579.147 448.202 565.011 448.202C550.892 448.202 537.953 443.092 527.953 434.613H602.086Z" fill="#008DD2"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M719.552 1228.71C719.552 1228.71 837.41 1213.98 906.244 1266.95C975.096 1319.91 968.395 1403.32 895.903 1446.99C823.41 1490.68 718.355 1492.15 622.633 1478.09C526.894 1464 529.099 1442.1 369.243 1471.32C178.893 1506.1 10.7125 1474.96 0.918093 1375.46C-8.87633 1275.94 61.3427 1243.69 132.946 1237.09C204.55 1230.47 403.361 1247.36 456.333 1262.23C509.322 1277.1 719.552 1228.71 719.552 1228.71Z" fill="#EF7F1A"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M14.9516 1414.69C7.19131 1403.06 2.33683 1389.99 0.918093 1375.46C-8.87633 1275.94 61.3427 1243.69 132.946 1237.09C204.55 1230.47 403.361 1247.36 456.333 1262.23C484.041 1270.01 554.739 1260.49 615.881 1249.63C622.838 1253.14 628.223 1256.39 629.214 1258.51C633.043 1266.8 603.899 1317.6 595.968 1322.61C588.036 1327.63 520.467 1379.34 496.297 1389.56C472.144 1399.78 219.335 1467.64 174.722 1456.48C150.091 1450.33 75.6326 1436.24 14.9516 1414.69Z" fill="#EF7F1A"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M24.6426 1283.12C49.8551 1253.53 91.1694 1240.93 132.945 1237.09C170.892 1233.58 244.564 1236.68 313.313 1242.57C318.475 1244.66 323.552 1246.95 328.441 1249.53C298.356 1261.05 284.323 1252.85 213.249 1318.81C142.193 1384.76 61.1708 1350.23 45.2228 1331.56C31.9756 1316.08 25.3947 1298.9 24.6426 1283.12Z" fill="#FF9429"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M719.551 1228.71C719.551 1228.71 837.409 1213.98 906.243 1266.95C915.354 1273.96 923.132 1281.5 929.61 1289.41C931.524 1306.37 928.533 1320.85 916.414 1328.21C873.647 1354.25 790.009 1370.98 733.311 1312.42C698.065 1276.03 661.383 1257.58 631.299 1246.83C680.22 1237.76 719.551 1228.71 719.551 1228.71Z" fill="#FF9429"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M953.781 1345.02C957.712 1383.25 937.799 1421.76 895.903 1446.99C823.411 1490.68 718.356 1492.15 622.634 1478.09C609.182 1476.1 597.661 1473.97 587.371 1471.85C535.356 1443.39 547.954 1411.22 547.954 1411.22L425.566 1462.17C409.293 1464.39 390.747 1467.39 369.244 1471.32C318.46 1480.6 269.266 1485.18 224.225 1485.03C192.602 1482.39 157.869 1479.11 123.426 1475.11C53.0019 1459.8 5.96138 1426.69 0.918875 1375.46C-0.294745 1363.08 -0.277652 1351.77 0.816315 1341.39C113.922 1426.53 319.229 1401.68 433.224 1389.39C550.757 1376.72 628.394 1283.24 628.394 1283.24L564.141 1396.43C564.141 1396.43 679.571 1412.62 803.463 1399.95C881.682 1391.95 929.286 1364.31 953.781 1345.02Z" fill="#D55222"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M487.221 1456.91C458.966 1461.68 431.035 1462.39 393.857 1467.01C448.778 1450.19 510.45 1421.2 553.884 1378.24C597.301 1335.29 628.889 1278.18 628.889 1278.18C628.889 1291.55 608.463 1367.06 573.285 1399.23C538.124 1431.42 518.433 1445.86 487.221 1456.91Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M330.407 1127.62C368.183 1114.85 423.889 1162.41 475.665 1162.29C520.859 1162.19 589.779 1113.67 624.598 1127.62C659.417 1141.55 710.304 1154.8 755.447 1168.39C739.02 1195.98 722.611 1223.57 706.201 1251.16C656.631 1223 561.866 1319.37 475.665 1318.81C384.831 1318.21 294.596 1223 245.043 1251.16C247.556 1224.03 250.085 1196.92 252.615 1169.79C278.546 1155.74 304.476 1141.67 330.407 1127.62Z" fill="#412C23"/>
+<path d="M360.167 1181.84C353.945 1175.91 353.706 1166.05 359.62 1159.81C365.552 1153.59 375.414 1153.33 381.653 1159.26C410.199 1186.32 443.309 1199.16 476.094 1199.02C510.058 1198.87 544.039 1184.8 572.636 1158.19C578.943 1152.32 588.806 1152.68 594.669 1158.97C600.532 1165.28 600.173 1175.14 593.883 1181.01C559.474 1213.02 518.04 1229.94 476.213 1230.13C435.583 1230.32 394.866 1214.71 360.167 1181.84Z" fill="#A34E1C"/>
+<path d="M333.946 1215.4C328.254 1208.97 328.852 1199.12 335.297 1193.43C341.724 1187.74 351.569 1188.34 357.261 1194.78C362.919 1201.19 368.885 1207.19 375.107 1212.8C407.054 1241.57 442.334 1255.11 477.17 1254.59C512.126 1254.06 547.15 1239.4 578.414 1211.74C584.618 1206.25 590.806 1200.08 596.977 1193.24C602.737 1186.85 612.6 1186.32 618.993 1192.08C625.403 1197.84 625.916 1207.71 620.155 1214.12C613.489 1221.52 606.429 1228.51 599.045 1235.04C562.09 1267.72 520.057 1285.05 477.546 1285.7C434.916 1286.35 392.285 1270.23 354.253 1235.98C347.467 1229.88 340.681 1223.02 333.946 1215.4Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M822.195 1218.61C853.476 1221.99 880.91 1230.9 896.209 1241.48C879.799 1247.26 869.731 1257.43 906.191 1267.02C896.328 1279.33 862.45 1285.53 822.195 1281.19C774.197 1276.01 735.293 1257.8 735.293 1240.52C735.293 1223.24 774.197 1213.43 822.195 1218.61Z" fill="#0E1E26"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M919.506 1235.45L910.857 1212.49L829.459 1194.83L755.104 1212.49L730.182 1241.53L735.874 1247.21C780.607 1272.33 882.431 1276.44 919.506 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M773.736 1229.36C775.702 1208.95 827.888 1200.34 844.366 1215.04C860.843 1229.76 859.664 1218.37 859.664 1218.37C859.664 1218.37 852.998 1207.98 868.501 1212.88C883.988 1217.79 891.663 1227.19 876.552 1234.25C861.442 1241.31 783.941 1244.87 773.736 1229.36Z" fill="#EBECEC"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M736.439 1256.03L706.201 1251.16C706.201 1251.16 708.355 1209.55 724.269 1199.57C740.183 1189.59 826.281 1168.07 846.246 1170.56C866.211 1173.06 903.32 1182.71 907.064 1188.65C910.807 1194.58 918.038 1209.77 918.038 1209.77L920.174 1235.45C884.176 1184.18 744.593 1200.65 736.439 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M918.037 1209.77C904.208 1137.95 831.562 1092.38 761.531 1091.83C700.081 1091.35 628.546 1130.19 626.854 1174.85C637.195 1214.12 670.356 1239.33 706.2 1251.16C754.831 1183.55 852.313 1171.19 918.037 1209.77Z" fill="#D9DADA"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M601.744 819.518C601.744 819.518 621.538 781.588 666.186 781.588C710.833 781.588 753.532 795.211 762.335 897.719C771.138 1000.23 791.616 1097.9 836.263 1140.67C880.911 1183.43 680.373 1193.06 672.903 1198.34C664.699 1204.13 614.256 1217.12 622.324 1110.67C628.051 1035.2 649.468 1025.05 654.562 986.655C660.118 944.828 637.366 851.414 601.744 819.518Z" fill="url(#paint6_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M802.555 1089.33C806.742 1098.79 811.272 1107.52 816.212 1115.44L748.813 1145.14L645.348 1198.99C640.904 1196.68 636.528 1192.89 632.768 1186.95C629.127 1170.78 628.306 1134.67 650.869 1057.83C661.689 1021.03 667.33 989.544 668.082 961.221C673.415 961.118 678.082 964.725 682.834 968.349C701.209 982.314 801.392 1088.8 802.555 1089.33Z" fill="#374B56"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M611.213 806.562C619.23 797.656 632.528 786.802 651.673 782.99H651.69C677.757 785.794 725.908 832.373 743.497 873.345C761.103 914.318 760.3 893.327 762.83 903.378C764.214 918.676 765.855 933.855 767.821 948.726C750.813 963.7 730.011 970.606 716.08 950.35C704.935 934.146 684.492 914.266 661.946 903.258C661.946 903.258 645.81 851.637 611.213 806.562Z" fill="#A4ACAE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M822.194 1218.61C858.158 1222.49 889.029 1233.7 902.242 1246.34C906.652 1250.56 884.926 1253.63 888.841 1255.48C891.456 1256.69 902.994 1263.91 906.173 1267.04C896.276 1279.34 862.432 1285.53 822.194 1281.19C785.666 1277.24 754.351 1268.32 736.437 1256.03C731.72 1252.8 735.292 1244.66 735.292 1240.52C735.292 1223.24 774.196 1213.43 822.194 1218.61Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M920.173 1235.45L910.857 1212.49L829.459 1194.83L755.104 1212.49L730.182 1241.53L735.874 1247.21C780.607 1272.33 883.098 1276.44 920.173 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M736.439 1256.03L706.201 1251.16C706.201 1251.16 708.355 1209.55 724.269 1199.57C740.183 1189.59 826.281 1168.07 846.246 1170.56C866.211 1173.06 903.32 1182.71 907.064 1188.65C910.807 1194.58 918.038 1209.77 918.038 1209.77L920.174 1235.45C884.176 1184.18 744.593 1200.65 736.439 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M775.94 1233.77C771.394 1212.05 800.11 1203.26 822.69 1199.69C836.673 1197.48 852.228 1202.7 851.663 1212.75C850.399 1235 864.33 1223.6 865.714 1219.48C867.013 1215.62 857.8 1211.02 858.723 1208.61C860.21 1204.7 866.124 1203.71 872.022 1206.19C881.542 1210.19 885.047 1233.23 869.936 1240.29C854.843 1247.35 779.239 1249.57 775.94 1233.77Z" fill="#FECC00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M661.947 903.258C684.493 914.266 704.937 934.145 716.082 950.35C730.013 970.605 750.815 963.699 767.823 948.726C774.814 1001.95 785.754 1051.37 802.556 1089.33C779.515 1078.98 748.866 1067.9 725.825 1069.42C683.673 1072.21 664.597 1082.55 664.597 1082.55C664.597 1082.55 683.604 1015.37 675.724 978.776C674.46 972.93 671.742 967.033 668.084 961.221C668.631 940.47 666.562 921.411 661.947 903.258Z" fill="#58666F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M587.369 1471.85C574.002 1463.51 549.286 1450.39 546.687 1422.52C531.355 1435.63 509.168 1449.27 487.887 1456.68C514.484 1456.17 552.448 1463.06 587.369 1471.85Z" fill="#FECC00"/>
+<path d="M493.477 321.164H460.795C456.99 321.164 453.906 324.244 453.906 328.044C453.906 331.844 456.99 334.924 460.795 334.924H493.477C497.282 334.924 500.366 331.844 500.366 328.044C500.366 324.244 497.282 321.164 493.477 321.164Z" fill="#FECC00"/>
+<path d="M493.477 340.77H460.795C456.99 340.77 453.906 343.85 453.906 347.65C453.906 351.449 456.99 354.53 460.795 354.53H493.477C497.282 354.53 500.366 351.449 500.366 347.65C500.366 343.85 497.282 340.77 493.477 340.77Z" fill="#FECC00"/>
+<path d="M493.477 360.359H460.795C456.99 360.359 453.906 363.44 453.906 367.239C453.906 371.039 456.99 374.119 460.795 374.119H493.477C497.282 374.119 500.366 371.039 500.366 367.239C500.366 363.44 497.282 360.359 493.477 360.359Z" fill="#FECC00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M648.632 110.746L651.453 112.866L630.736 153.445H628.719L648.632 110.746Z" fill="#5B5B5B"/>
+<path d="M630.719 26.3926H628.719V153.447H630.719V26.3926Z" fill="#FEFEFE"/>
+<path d="M629.727 48.032C642.991 48.032 653.743 37.2797 653.743 24.016C653.743 10.7523 642.991 0 629.727 0C616.463 0 605.711 10.7523 605.711 24.016C605.711 37.2797 616.463 48.032 629.727 48.032Z" fill="url(#paint7_radial_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M130.041 1218.61C98.7604 1221.99 71.3258 1230.9 56.0274 1241.48C72.4369 1247.26 82.5048 1257.43 46.0449 1267.02C55.9077 1279.33 89.7865 1285.53 130.041 1281.19C178.039 1276.01 216.943 1257.8 216.943 1240.52C216.943 1223.24 178.039 1213.43 130.041 1218.61Z" fill="#0E1E26"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M32.7285 1235.45L41.3606 1212.49L122.776 1194.83L197.131 1212.49L222.053 1241.53L216.361 1247.21C171.628 1272.33 69.8037 1276.44 32.7285 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M178.501 1229.36C176.535 1208.95 124.349 1200.34 107.871 1215.04C91.3935 1229.76 92.5729 1218.37 92.5729 1218.37C92.5729 1218.37 99.2393 1207.98 83.7357 1212.88C68.2493 1217.79 60.5744 1227.19 75.6848 1234.25C90.7952 1241.31 168.296 1244.87 178.501 1229.36Z" fill="#EBECEC"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M215.798 1256.03L246.036 1251.16C246.036 1251.16 243.882 1209.55 227.968 1199.57C212.054 1189.59 125.956 1168.07 105.991 1170.56C86.0258 1173.06 48.9164 1182.71 45.173 1188.65C41.4125 1194.58 34.1992 1209.77 34.1992 1209.77L32.0625 1235.45C68.0608 1184.18 207.644 1200.65 215.798 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M34.1992 1209.77C48.0276 1137.95 120.674 1092.38 190.705 1091.83C252.155 1091.35 323.69 1130.19 325.382 1174.85C315.041 1214.12 281.88 1239.33 246.036 1251.16C197.388 1183.55 99.9227 1171.19 34.1992 1209.77Z" fill="#D9DADA"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M149.681 1089.33C145.493 1098.79 140.946 1107.52 136.023 1115.44L203.422 1145.14L306.87 1198.99C311.332 1196.68 315.707 1192.89 319.451 1186.95C323.109 1170.78 323.929 1134.67 301.349 1057.83C290.546 1021.03 284.905 989.544 284.153 961.221C278.82 961.118 274.154 964.725 269.402 968.349C251.027 982.314 150.843 1088.8 149.681 1089.33Z" fill="#374B56"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M341.022 806.56C333.006 797.654 319.707 786.8 300.545 782.988C274.478 785.792 226.327 832.371 208.738 873.343C191.132 914.316 191.935 893.325 189.405 903.376C188.021 918.674 186.363 933.853 184.414 948.724C201.422 963.698 222.224 970.604 236.155 950.348C247.3 934.144 267.726 914.264 290.29 903.256C290.29 903.256 306.426 851.635 341.022 806.56Z" fill="#A4ACAE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M130.041 1218.61C94.0764 1222.49 65.5136 1231.65 52.3005 1244.28C47.8905 1248.51 66.0777 1253.16 62.1462 1254.98C59.531 1256.2 46.9503 1262.63 43.7539 1265.75C53.6509 1278.04 89.8031 1285.53 130.041 1281.19C166.552 1277.24 197.866 1268.32 215.797 1256.03C220.515 1252.8 216.943 1244.66 216.943 1240.52C216.943 1223.24 178.038 1213.43 130.041 1218.61Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M32.0625 1235.45L41.3612 1212.49L122.776 1194.83L197.132 1212.49L222.054 1241.53L216.362 1247.21C171.629 1272.33 69.1377 1276.44 32.0625 1235.45Z" fill="#11252F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M215.798 1256.03L246.036 1251.16C246.036 1251.16 243.882 1209.55 227.968 1199.57C212.054 1189.59 125.956 1168.07 105.991 1170.56C86.0258 1173.06 48.9164 1182.71 45.173 1188.65C41.4125 1194.58 34.1992 1209.77 34.1992 1209.77L32.0625 1235.45C68.0608 1184.18 207.644 1200.65 215.798 1256.03Z" fill="#50606D"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M34.1992 1209.77C48.0276 1137.95 120.674 1092.38 190.705 1091.83C252.155 1091.35 323.69 1130.19 325.382 1174.85C315.041 1214.12 281.88 1239.33 246.036 1251.16C197.388 1183.55 99.9227 1171.19 34.1992 1209.77Z" fill="url(#paint8_linear_6524_4415)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M176.295 1233.77C180.842 1212.05 152.125 1203.26 129.545 1199.69C115.545 1197.48 100.008 1202.7 100.572 1212.75C101.82 1235 87.8886 1223.6 86.5041 1219.48C85.205 1215.62 94.4354 1211.02 93.5123 1208.61C92.0252 1204.7 86.1109 1203.71 80.2138 1206.19C70.6929 1210.19 67.1887 1233.23 82.2821 1240.29C97.3925 1247.35 172.979 1249.57 176.295 1233.77Z" fill="#FECC00"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M290.291 903.258C267.727 914.266 247.301 934.145 236.156 950.35C222.225 970.605 201.423 963.699 184.415 948.726C177.424 1001.95 166.467 1051.37 149.682 1089.33C172.723 1078.98 203.371 1067.9 226.413 1069.42C268.565 1072.21 287.641 1082.55 287.641 1082.55C287.641 1082.55 268.616 1015.37 276.513 978.776C277.778 972.93 280.479 967.033 284.154 961.221C283.607 940.47 285.675 921.411 290.291 903.258Z" fill="#58666F"/>
+<path d="M268.428 841.961C276.716 841.961 283.436 835.242 283.436 826.953C283.436 818.665 276.716 811.945 268.428 811.945C260.139 811.945 253.42 818.665 253.42 826.953C253.42 835.242 260.139 841.961 268.428 841.961Z" fill="#EBECEC"/>
+<path d="M308.221 163.513C318.718 163.513 327.228 155.003 327.228 144.506C327.228 134.008 318.718 125.498 308.221 125.498C297.723 125.498 289.213 134.008 289.213 144.506C289.213 155.003 297.723 163.513 308.221 163.513Z" fill="#FEFEFE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M700.955 813.586C711.45 813.586 719.963 822.098 719.963 832.594C719.963 843.089 711.45 851.601 700.955 851.601C690.46 851.601 681.947 843.089 681.947 832.594C681.947 822.098 690.46 813.586 700.955 813.586Z" fill="#FEFEFE" fill-opacity="0.501961"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.307 739.607C516.775 739.607 553.765 753.949 583.422 778.306C563.029 805.536 522.433 824.099 475.683 824.099C428.694 824.099 387.943 805.365 367.637 777.93C397.208 753.795 434.044 739.607 475.307 739.607Z" fill="#A4ACAE"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M537.012 747.316C542.858 751.863 548.447 755.76 555.609 759.624C543.302 777.076 512.158 789.468 475.681 789.468C438.982 789.468 407.702 776.922 395.531 759.333C402.693 755.521 411.394 750.051 414.522 747.436C429.273 755.948 453.118 763.247 475.681 763.247C498.244 763.247 522.278 755.743 537.012 747.316Z" fill="#58666F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M537.014 747.317C522.091 757.077 500.143 763.248 475.683 763.248C451.308 763.248 429.429 757.128 414.523 747.436C443.479 726.753 442.915 711.028 427.668 699.9L519.408 699.404C501.562 719.044 515.134 732.565 537.014 747.317Z" fill="#412C23"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M537.013 747.316L546.585 751.47C547.08 751.692 546.345 752.103 546.841 752.342L555.371 756.444C555.866 756.683 554.943 757.367 555.422 757.658C571.079 767.298 585.643 778.922 598.565 792.648C575.336 965.751 665.827 1157.67 475.306 1171.02C393.771 1176.75 322.339 1107.27 299.4 1026.88C295.947 1014.77 299.177 1004.35 297.536 991.271C291.263 985.305 289.297 976.673 289.109 970.725C289.075 969.545 299.912 968.434 300.545 968.588C297.622 956.247 289.981 941.564 293.109 917.172C395.874 896.455 497.681 831.569 537.013 747.316Z" fill="#EC691F"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M546.619 752.324C493.51 851.55 394.865 925.855 288.904 947.358L289.109 970.724C387.242 954.828 504.877 872.934 546.619 752.324Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M555.285 757.334C499.459 879.841 403.788 966.008 292.426 992.537L299.4 1026.88C402.523 1007.27 511.407 906.233 555.285 757.334Z" fill="#A34E1C"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M475.7 928.691C497.836 928.691 515.784 946.639 515.784 968.792C515.784 990.928 497.836 1008.89 475.7 1008.89C453.548 1008.89 435.6 990.928 435.6 968.792C435.6 946.639 453.548 928.691 475.7 928.691Z" fill="#F8AF28" fill-opacity="0.239216"/>
+<path d="M479.974 968.637V958.005C479.974 957.424 479.752 957.117 479.324 957.082H470.47C469.94 957.082 469.667 957.39 469.667 958.005V968.637C469.667 969.253 469.94 969.56 470.47 969.56H479.188C479.718 969.56 479.974 969.253 479.974 968.637ZM479.188 976.295H470.47C469.94 976.295 469.667 976.603 469.667 977.218V980.927C469.667 981.936 469.154 982.432 468.094 982.432H463.53C462.47 982.432 461.941 981.936 461.941 980.927V958.005C461.941 957.424 461.718 957.117 461.291 957.082H457.924C456.864 957.082 456.334 956.553 456.334 955.493V951.664C456.334 950.69 456.864 950.211 457.924 950.211H492.059C493.119 950.211 493.649 950.707 493.649 951.732V955.493C493.649 956.553 493.119 957.082 492.059 957.082H488.503C487.974 957.082 487.7 957.39 487.7 958.005V989.833C487.7 990.842 487.17 991.354 486.127 991.354H481.564C480.504 991.354 479.974 990.842 479.974 989.833V977.218C479.974 976.603 479.718 976.295 479.188 976.295Z" fill="#A34E1C"/>
+<path d="M464.623 969.459H458.521C458.059 969.459 457.684 969.964 457.684 970.587V975.544C457.684 976.167 458.059 976.672 458.521 976.672H464.623C465.086 976.672 465.461 976.167 465.461 975.544V970.587C465.461 969.964 465.086 969.459 464.623 969.459Z" fill="#A34E1C"/>
+<defs>
+<linearGradient id="paint0_linear_6524_4415" x1="204.345" y1="533.701" x2="229.352" y2="438.97" gradientUnits="userSpaceOnUse">
+<stop stop-color="#374B56"/>
+<stop offset="1" stop-color="#898989"/>
+</linearGradient>
+<radialGradient id="paint1_radial_6524_4415" cx="0" cy="0" r="1" gradientTransform="matrix(124.017 4.00035 -1.33306 118.217 464.349 115.789)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#EBE3D6"/>
+<stop offset="1" stop-color="#D1D0CC"/>
+</radialGradient>
+<linearGradient id="paint2_linear_6524_4415" x1="478.435" y1="666.585" x2="475.067" y2="38.4257" gradientUnits="userSpaceOnUse">
+<stop stop-color="#828991"/>
+<stop offset="1" stop-color="#C7C7C9"/>
+</linearGradient>
+<radialGradient id="paint3_radial_6524_4415" cx="0" cy="0" r="1" gradientTransform="matrix(-2.84241 312.13 -384.583 2.19371 475.705 375.654)" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7A6A48"/>
+<stop offset="0.658824" stop-color="#412C23"/>
+<stop offset="1" stop-color="#412C23"/>
+</radialGradient>
+<linearGradient id="paint4_linear_6524_4415" x1="571.78" y1="60.0655" x2="510.945" y2="403.434" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="0.211765" stop-color="white" stop-opacity="0.501961"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint5_linear_6524_4415" x1="567.986" y1="46.7843" x2="489.237" y2="616.963" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FEFEFE"/>
+<stop offset="0.25098" stop-color="#FEFEFE"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+<linearGradient id="paint6_linear_6524_4415" x1="626.153" y1="1203.16" x2="682.185" y2="829.859" gradientUnits="userSpaceOnUse">
+<stop stop-color="#757E87"/>
+<stop offset="1" stop-color="#D9DADA"/>
+</linearGradient>
+<radialGradient id="paint7_radial_6524_4415" cx="0" cy="0" r="1" gradientTransform="matrix(-4.82176 24.9087 -35.3555 -6.27467 638.383 12.0215)" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="0.160784" stop-color="#D3A856"/>
+<stop offset="0.631373" stop-color="#412C23"/>
+<stop offset="1" stop-color="#211C1E"/>
+</radialGradient>
+<linearGradient id="paint8_linear_6524_4415" x1="177.167" y1="1207.96" x2="177.492" y2="1103.16" gradientUnits="userSpaceOnUse">
+<stop stop-color="#979FA3"/>
+<stop offset="1" stop-color="#E9E4EB"/>
+</linearGradient>
+</defs>
+</svg></span>
+    <span class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">AI-Native Summer Series</span>
+    </span>
+  </a>
+  <div class="nav-right">
+    <div class="nav-progress-wrap">
+      <span class="nav-progress-label">Progress</span>
+      <div class="nav-progress-bar"><div class="nav-progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <span class="hero-badge"><span class="dot"></span>Learn by doing · No code needed</span>
+    <h1>What a language model<br><em>actually</em> is</h1>
+    <p class="hero-sub">Underneath every AI chat is one surprisingly simple idea: a very good <b>guess-the-next-word machine</b>. You don't need to code to understand it — you just need to play with it. Four hands-on experiments, each built from something you already know.</p>
+    <div class="audience-row">
+      <span class="aud-chip"><span class="d"></span>Management</span>
+      <span class="aud-chip"><span class="d"></span>Social science</span>
+      <span class="aud-chip"><span class="d"></span>Engineering</span>
+      <span class="aud-chip"><span class="d"></span>Simply curious</span>
+      <span class="aud-chip"><span class="d"></span>Everyone welcome</span>
+    </div>
+  </div>
+</header>
+
+<div class="station-nav" id="stationNav">
+  <a href="#s1" data-s="s1"><span class="n">1</span> Guess the next word</a>
+  <a href="#s2" data-s="s2"><span class="n">2</span> How it reads</a>
+  <a href="#s3" data-s="s3"><span class="n">3</span> Its memory</a>
+  <a href="#s4" data-s="s4"><span class="n">4</span> The creativity dial</a>
+</div>
+
+<!-- ===== 1. PREDICTION ===== -->
+<section class="station" id="s1">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">1</span>The one idea underneath everything</span>
+      <h2 class="sec-title">It just guesses the next word</h2>
+      <p class="sec-intro">You already do this. When a friend texts "Are we still on for…", your brain fills in the rest before you read it. That's <b>exactly</b> what a language model does — at enormous scale. Pick a sentence below, guess the next word yourself, then see what the model expects. You'll often agree with it.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">guess-the-next-word — you vs. the machine</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — pick a sentence, then guess</span>
+        <div class="preset-row" id="predPresets"></div>
+        <div class="pred-stem" id="predStem"></div>
+        <div class="pred-guess-row">
+          <input class="txt-input" id="predGuess" placeholder="Type your guess for the next word…" autocomplete="off">
+          <button class="btn" id="predReveal">Reveal the model's guesses</button>
+        </div>
+        <div class="pred-cands" id="predCands"></div>
+        <div class="pred-controls">
+          <button class="btn btn-ghost" id="predNext" disabled>Add the top word &amp; continue →</button>
+        </div>
+        <p class="pred-note" id="predNote">The bars show how strongly the model expects each word. Notice it never asks what's <em>true</em> — only what's <em>likely</em>.</p>
+      </div>
+    </div>
+
+    <div class="world">
+      <div class="world-title">Where you'll meet this</div>
+      <div class="world-grid">
+        <div class="world-card"><div class="wl">Management</div><div class="wt">Email autocomplete finishing your sentence.</div></div>
+        <div class="world-card"><div class="wl">Social science</div><div class="wt">Survey tools suggesting the next phrase.</div></div>
+        <div class="world-card"><div class="wl">Engineering</div><div class="wt">Code editors predicting the next line.</div></div>
+        <div class="world-card"><div class="wl">Everyday</div><div class="wt">Your phone's keyboard guessing your next word.</div></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">In one line</div>
+      <div class="defn-term">A prediction engine</div>
+      <p>Given the text so far, the model predicts what is most likely to come next — then again, and again. To do that <em>well</em>, it has to absorb grammar, context, tone and subject matter. Whether that's "real" understanding is a question for philosophers; the practical point is simpler: it's <b>sophisticated enough to be useful, and unreliable enough to need your judgement.</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 2. TOKENS ===== -->
+<section class="station" id="s2" style="background:var(--bg-light)">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">2</span>How the machine reads</span>
+      <h2 class="sec-title">It reads in chunks, not letters</h2>
+      <p class="sec-intro">Before the model reads your message, it chops the text into small pieces called <b>tokens</b> — a bit like reading in LEGO bricks instead of single letters. A token is often a whole word, sometimes just a fragment like "ing". Type anything — your name, a message, a long word — and watch it break apart.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">tokeniser — see your words become tokens</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — click a sample or type your own</span>
+        <div class="preset-row" id="tkPresets"></div>
+        <input class="txt-input" id="tkInput" value="Hi! Can't wait to see you tomorrow." autocomplete="off" spellcheck="false">
+        <div class="tk-out" id="tkOut"></div>
+        <div class="tk-stats">
+          <div class="tk-stat"><div class="v" id="tkWords">0</div><div class="l">Words</div></div>
+          <div class="tk-stat"><div class="v" id="tkTokens">0</div><div class="l">Tokens</div></div>
+          <div class="tk-stat ratio"><div class="v" id="tkRatio">0</div><div class="l">Tokens / word</div></div>
+        </div>
+
+        <div class="tk-demo">
+          <h5>Why it sometimes can't count letters</h5>
+          <div class="tk-demo-row">
+            <span style="font-size:.84rem;color:var(--text-secondary)">Ask the model: how many letter “R”s are in <b>strawberry</b>?</span>
+            <button class="btn btn-ghost" id="tkAsk">Ask it</button>
+            <button class="btn btn-ghost" id="tkCount" style="display:none">Now count them yourself</button>
+          </div>
+          <div id="tkDemoOut"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="world">
+      <div class="world-title">Where you'll meet this</div>
+      <div class="world-grid">
+        <div class="world-card"><div class="wl">Management</div><div class="wt">Why a long report costs more "tokens" than it has pages.</div></div>
+        <div class="world-card"><div class="wl">Social science</div><div class="wt">Why text in some languages uses more tokens than English.</div></div>
+        <div class="world-card"><div class="wl">Engineering</div><div class="wt">Why API usage is billed in tokens, not words.</div></div>
+        <div class="world-card"><div class="wl">Everyday</div><div class="wt">Why it can write a poem yet miscount letters.</div></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">Definition</div>
+      <div class="defn-term">Token</div>
+      <p>A small chunk of text — often a whole word, but sometimes a fragment such as "ing" or "ation". When you send a prompt, your words are first broken into tokens. <b>The model thinks in tokens, not in words</b>, which is why it occasionally makes peculiar mistakes with spelling or counting letters. Rough rule of thumb: 100 tokens ≈ 75 words.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 3. CONTEXT WINDOW ===== -->
+<section class="station" id="s3">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">3</span>How much it can hold in mind</span>
+      <h2 class="sec-title">Its memory is a desk, not a filing cabinet</h2>
+      <p class="sec-intro">The model can only "see" a certain amount of text at once — its <b>context window</b>. Picture a colleague with a small desk: only so many pages fit, and when new ones arrive, the oldest slide off the edge. Shrink the desk below and watch the start of the conversation disappear — then ask about it.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">a long chat — loaded onto the desk</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — drag the slider, then ask</span>
+        <div class="cw-slider-label"><span>How much fits on the desk (context window)</span><b id="cwSizeLabel">6 messages</b></div>
+        <input type="range" id="cwSlider" min="2" max="8" value="6" step="1">
+        <div class="cw-desk" id="cwDesk"></div>
+        <div class="cw-ask">
+          <span style="font-size:.82rem;font-weight:600;color:var(--text-secondary)">Ask the assistant about:</span>
+          <select id="cwAsk"></select>
+          <button class="btn" id="cwAskBtn">Ask</button>
+        </div>
+        <div class="cw-reply" id="cwReply"></div>
+      </div>
+    </div>
+
+    <div class="world">
+      <div class="world-title">Where you'll meet this</div>
+      <div class="world-grid">
+        <div class="world-card"><div class="wl">Management</div><div class="wt">A long email thread where it forgets the first message.</div></div>
+        <div class="world-card"><div class="wl">Social science</div><div class="wt">A lengthy interview transcript losing its early answers.</div></div>
+        <div class="world-card"><div class="wl">Engineering</div><div class="wt">A big file where earlier code drops out of view.</div></div>
+        <div class="world-card"><div class="wl">Everyday</div><div class="wt">A chat so long it forgets how it began.</div></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">Definition</div>
+      <div class="defn-term">Context window</div>
+      <p>The amount of text — measured in tokens — the model can hold in mind at once. Modern systems range from roughly 8,000 tokens (about 6,000 words) to over a million. When you upload a long document, the system fits as much as it can; <b>anything that falls outside is, for that conversation, forgotten</b>. It hasn't truly forgotten — the assistant simply stopped including it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 4. TEMPERATURE ===== -->
+<section class="station" id="s4" style="background:var(--bg-light)">
+  <div class="container reveal">
+    <div class="sec-head">
+      <span class="sec-kicker"><span class="num">4</span>The creativity dial</span>
+      <h2 class="sec-title">Temperature: steady, or surprising?</h2>
+      <p class="sec-intro">One hidden setting decides how adventurous the model is. Think of a barista: turn it <b>down</b> and you get the same reliable latte every time; turn it <b>up</b> and they start inventing new drinks — exciting, occasionally odd. Same request, different dial. Generate a few names at each setting and feel the difference.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar"><div class="lab-dots"><span></span><span></span><span></span></div><div class="lab-bar-title">creativity dial — same request, different settings</div></div>
+      <div class="lab-body">
+        <span class="try-tag">Try it — set the dial, generate a few times</span>
+        <div class="tmp-wrap">
+          <div class="tmp-left">
+            <div class="cw-slider-label"><span>Temperature</span><b id="tmpVal">0.2</b></div>
+            <input type="range" id="tmpSlider" min="0" max="100" value="20" step="1">
+            <div class="tmp-gauge"><div class="knob" id="tmpKnob"></div></div>
+            <div class="tmp-mood" id="tmpMood"></div>
+            <div class="tmp-prompt"><b>The request:</b> "Suggest a name for our new community garden project."</div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <button class="btn" id="tmpGen">Generate a name</button>
+              <button class="btn btn-ghost" id="tmpClear">Clear</button>
+            </div>
+          </div>
+          <div class="tmp-right">
+            <h5>Names it suggests</h5>
+            <div class="tmp-outputs" id="tmpOutputs"><div class="tmp-output empty">Press "Generate a name" to begin →</div></div>
+            <div class="tmp-consistency" id="tmpConsistency"></div>
+          </div>
+        </div>
+        <div class="tmp-guide">
+          <div class="tmp-guide-card down"><div class="gt">Turn it down for</div>Facts, figures, summaries, policies, anything that must be consistent and correct.</div>
+          <div class="tmp-guide-card up"><div class="gt">Turn it up for</div>Brainstorming, names, taglines, stories — anywhere variety and surprise help.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="world">
+      <div class="world-title">Where you'll meet this</div>
+      <div class="world-grid">
+        <div class="world-card"><div class="wl">Management</div><div class="wt">Low for the policy FAQ; high for the campaign slogan.</div></div>
+        <div class="world-card"><div class="wl">Social science</div><div class="wt">Low to summarise findings; high to brainstorm hypotheses.</div></div>
+        <div class="world-card"><div class="wl">Engineering</div><div class="wt">Low for config and code; high for naming things.</div></div>
+        <div class="world-card"><div class="wl">Everyday</div><div class="wt">Low for directions; high for a birthday-card message.</div></div>
+      </div>
+    </div>
+
+    <div class="defn">
+      <div class="defn-label">Definition</div>
+      <div class="defn-term">Temperature</div>
+      <p>A setting that controls how predictable the output is. <b>Low temperature</b> → consistent, conservative answers, good for facts, summaries and structured output. <b>High temperature</b> → more variation and creativity, good for brainstorming, story-writing and ideation. In most consumer chat apps it's set for you and hidden; in business tools you can usually adjust it.</p>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">The whole picture</div>
+      <p>That's the machine: it <b>guesses the next token</b>, it reads in <b>chunks</b>, it holds a <b>limited window</b> in mind, and a <b>dial</b> tunes how adventurous it is. Everything astonishing you've seen AI do grows from those four simple things — which is exactly why it's <b>powerful enough to lean on, and quirky enough to keep checking.</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CLOSING ===== -->
+<section class="closing">
+  <div class="closing-box reveal">
+    <h2>You now know how it thinks</h2>
+    <p>No code, no maths — just four ideas you can feel. Here's the whole machine in four lines:</p>
+    <div class="recap">
+      <div class="recap-item"><div class="rt">Prediction</div><div class="rd">It guesses the most likely next word, over and over.</div></div>
+      <div class="recap-item"><div class="rt">Tokens</div><div class="rd">It reads in chunks, which is why it can miscount letters.</div></div>
+      <div class="recap-item"><div class="rt">Context window</div><div class="rd">It holds a limited amount in mind; the rest slips away.</div></div>
+      <div class="recap-item"><div class="rt">Temperature</div><div class="rd">A dial from steady-and-safe to creative-and-surprising.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><b>MokshPath</b> · AI-Native Summer Series · A hands-on companion to your reading — built for every background. Now go play with a real one.</p>
+</footer>
+
+<script>
+/* ============================================================
+   PROGRESS TRACKER (defined first so init code can call it)
+   ============================================================ */
+const doneSet = new Set();
+function markDone(id){
+  if(doneSet.has(id)) return;
+  doneSet.add(id);
+  const pct = Math.round(doneSet.size/4*100);
+  const fill = document.getElementById('progressFill');
+  if(fill) fill.style.width = pct+'%';
+}
+
+/* ============================================================
+   1 · PREDICTION  (guess the next word)
+   ============================================================ */
+const PRED = {
+  text:{ label:'Texting a friend', prefix:'Are we still on for', steps:[
+    [['dinner',0.40],['tonight',0.27],['lunch',0.18],['coffee',0.15]],
+    [['tonight',0.55],['this',0.20],['later',0.14],['—',0.11]],
+    [['?',0.83],['or',0.08],['then',0.05],['instead',0.04]]
+  ]},
+  email:{ label:'A work email', prefix:'Thanks for your patience — I’ll get back to you', steps:[
+    [['shortly',0.46],['soon',0.30],['by',0.14],['as',0.10]],
+    [['with',0.50],['once',0.22],['after',0.16],['—',0.12]],
+    [['an',0.42],['the',0.33],['more',0.15],['full',0.10]],
+    [['update',0.70],['answer',0.16],['estimate',0.08],['email',0.06]]
+  ]},
+  story:{ label:'Opening a story', prefix:'It was a dark and stormy', steps:[
+    [['night',0.92],['evening',0.04],['sky',0.02],['sea',0.02]],
+    [['.',0.40],['and',0.30],['—',0.18],['when',0.12]]
+  ]}
+};
+let predKey='text', predIdx=0;
+const predStem=document.getElementById('predStem');
+const predCands=document.getElementById('predCands');
+const predGuess=document.getElementById('predGuess');
+const predReveal=document.getElementById('predReveal');
+const predNext=document.getElementById('predNext');
+const predNote=document.getElementById('predNote');
+
+function predBuildPresets(){
+  const row=document.getElementById('predPresets');
+  Object.keys(PRED).forEach((k,i)=>{
+    const b=document.createElement('button');
+    b.className='preset'+(i===0?' active':''); b.textContent=PRED[k].label; b.dataset.k=k;
+    b.addEventListener('click',()=>{ predKey=k; predIdx=0;
+      document.querySelectorAll('#predPresets .preset').forEach(x=>x.classList.toggle('active',x===b));
+      predResetStem(); });
+    row.appendChild(b);
+  });
+}
+function predRenderStem(){
+  const s=PRED[predKey];
+  let html=s.prefix;
+  for(let i=0;i<predIdx;i++){
+    const w=s.steps[i][0][0];
+    html+=(w==='?'||w==='.'||w==='—'?'':' ')+`<span class="tok${i===predIdx-1?' fresh':''}">${w}</span>`;
+  }
+  if(predIdx<s.steps.length) html+=' <span class="pred-cursor"></span>';
+  predStem.innerHTML=html;
+}
+function predRenderCands(highlightGuess){
+  const s=PRED[predKey];
+  predCands.innerHTML='';
+  if(predIdx>=s.steps.length){
+    predCands.innerHTML='<div style="font-size:.85rem;color:var(--green-dark);font-weight:600">That\'s a complete sentence — built entirely by chaining "most likely next word." No understanding required, just very good guessing.</div>';
+    return;
+  }
+  const guess=(predGuess.value||'').trim().toLowerCase();
+  let matched=false;
+  s.steps[predIdx].forEach((c,i)=>{
+    const isMatch=highlightGuess && guess && c[0].toLowerCase()===guess;
+    if(isMatch) matched=true;
+    const row=document.createElement('div');
+    row.className='cand '+(i===0?'top':'dim')+(isMatch?' match':'');
+    row.innerHTML=`<div class="cand-word${isMatch?' match':''}">${c[0]==='?'?'? (question mark)':(c[0]==='.'?'. (full stop)':c[0])}</div>
+      <div class="cand-bar-track"><div class="cand-bar"></div></div>
+      <div class="cand-pct">${Math.round(c[1]*100)}%</div>`;
+    predCands.appendChild(row);
+    requestAnimationFrame(()=>{row.querySelector('.cand-bar').style.width=(c[1]*100)+'%';});
+  });
+  if(highlightGuess){
+    if(guess && matched){ predNote.className='pred-note win'; predNote.textContent='Nice — your guess is one of the model\'s top picks. You think like the machine!'; }
+    else if(guess){ predNote.className='pred-note'; predNote.innerHTML='Your guess wasn\'t in its top list — that\'s fine. The model leans on what\'s <em>statistically</em> most common, which isn\'t always what you\'d say.'; }
+    else { predNote.className='pred-note'; predNote.textContent='These are the model\'s most-expected next words. The top one is what it would pick.'; }
+  }
+}
+function predResetStem(){
+  predIdx=0; predGuess.value=''; predNext.disabled=true; predReveal.disabled=false;
+  predNote.className='pred-note';
+  predNote.innerHTML='The bars show how strongly the model expects each word. Notice it never asks what\'s <em>true</em> — only what\'s <em>likely</em>.';
+  predRenderStem(); predCands.innerHTML='';
+}
+predReveal.addEventListener('click',()=>{
+  predRenderCands(true);
+  if(predIdx<PRED[predKey].steps.length){ predNext.disabled=false; predReveal.disabled=true; }
+  markDone('s1');
+});
+predNext.addEventListener('click',()=>{
+  predIdx++; predGuess.value='';
+  predRenderStem();
+  if(predIdx>=PRED[predKey].steps.length){
+    predRenderCands(false); predNext.disabled=true; predReveal.disabled=true;
+    predNote.className='pred-note win'; predNote.textContent='Sentence complete — assembled one likely guess at a time.';
+  } else {
+    predCands.innerHTML=''; predNext.disabled=true; predReveal.disabled=false;
+    predNote.className='pred-note'; predNote.textContent='Your turn again — guess the next word, then reveal.';
+  }
+});
+predGuess.addEventListener('keydown',e=>{ if(e.key==='Enter') predReveal.click(); });
+predBuildPresets(); predResetStem();
+
+/* ============================================================
+   2 · TOKENS
+   ============================================================ */
+const TK_PRESETS=[
+  "Hi! Can't wait to see you tomorrow.",
+  "strawberry",
+  "internationalization",
+  "Email me at hello@example.org #excited"
+];
+const TK_COLORS=['#E87A2E','#4CAF50','#4285F4','#E8A040','#9C5BD6','#0FA3A3','#D64545','#C08830'];
+const tkInput=document.getElementById('tkInput');
+const tkOut=document.getElementById('tkOut');
+function tokenizeWord(w){
+  const known={
+    'strawberry':['straw','berry'],'internationalization':['inter','national','ization'],
+    'tomorrow':['tom','orrow'],'excited':['exc','ited'],'example':['ex','ample']
+  };
+  const low=w.toLowerCase();
+  if(known[low]){
+    const pieces=known[low].slice();
+    if(w[0]===w[0].toUpperCase()) pieces[0]=pieces[0][0].toUpperCase()+pieces[0].slice(1);
+    return pieces;
+  }
+  if(w.length<=5) return [w];
+  const out=[]; let i=0; while(i<w.length){ out.push(w.slice(i,i+5)); i+=5; } return out;
+}
+function tokenize(text){
+  const tokens=[]; const parts=text.match(/\s+|[A-Za-z']+|[^\sA-Za-z']/g)||[];
+  parts.forEach(p=>{
+    if(/^\s+$/.test(p)) tokens.push({t:'·',space:true});
+    else if(/^[A-Za-z']+$/.test(p)) tokenizeWord(p).forEach(s=>tokens.push({t:s}));
+    else tokens.push({t:p});
+  });
+  return tokens;
+}
+function renderTokens(){
+  const text=tkInput.value; const tokens=tokenize(text);
+  tkOut.innerHTML=''; let ci=0;
+  tokens.forEach(tok=>{
+    const s=document.createElement('span');
+    if(tok.space){ s.className='tk-chip space'; s.textContent='␣'; }
+    else{ s.className='tk-chip'; s.textContent=tok.t; const c=TK_COLORS[ci%TK_COLORS.length]; ci++; s.style.background=c+'22'; s.style.color=c; }
+    tkOut.appendChild(s);
+  });
+  const words=(text.trim().match(/[A-Za-z']+/g)||[]).length;
+  const toks=tokens.filter(t=>!t.space).length;
+  document.getElementById('tkWords').textContent=words;
+  document.getElementById('tkTokens').textContent=toks;
+  document.getElementById('tkRatio').textContent=words?(toks/words).toFixed(1):'0';
+  markDone('s2');
+}
+function tkBuildPresets(){
+  const row=document.getElementById('tkPresets');
+  TK_PRESETS.forEach((p,i)=>{
+    const b=document.createElement('button'); b.className='preset'+(i===0?' active':'');
+    b.textContent=p.length>26?p.slice(0,24)+'…':p; b.title=p;
+    b.addEventListener('click',()=>{ document.querySelectorAll('#tkPresets .preset').forEach(x=>x.classList.remove('active')); b.classList.add('active'); tkInput.value=p; renderTokens(); });
+    row.appendChild(b);
+  });
+}
+tkInput.addEventListener('input',()=>{ document.querySelectorAll('#tkPresets .preset').forEach(x=>x.classList.remove('active')); renderTokens(); });
+tkBuildPresets(); renderTokens();
+
+// strawberry letter-count demo
+const tkDemoOut=document.getElementById('tkDemoOut');
+document.getElementById('tkAsk').addEventListener('click',()=>{
+  tkDemoOut.innerHTML=`<div style="margin-top:.3rem"><span class="tk-chip" style="background:#E87A2E22;color:#E87A2E">straw</span><span class="tk-chip" style="background:#4CAF5022;color:#4CAF50">berry</span></div>
+    <div class="tk-demo-msg guess">The model sees 2 chunks — <b>straw</b> + <b>berry</b> — not 10 separate letters. So it often answers “2”, confidently and wrongly.</div>`;
+  document.getElementById('tkCount').style.display='inline-flex';
+  markDone('s2');
+});
+document.getElementById('tkCount').addEventListener('click',()=>{
+  const word="strawberry"; let html='';
+  for(const ch of word){ html+= (ch==='r')?`<span class="r">r</span>`:ch; }
+  tkDemoOut.innerHTML+=`<div class="tk-letters">${html}</div>
+    <div class="tk-demo-msg truth">Counted letter by letter, there are 3 R's. The model isn't "bad at spelling" — it simply never saw the letters, only the chunks.</div>`;
+  document.getElementById('tkCount').style.display='none';
+});
+
+/* ============================================================
+   3 · CONTEXT WINDOW
+   ============================================================ */
+const CW=[
+  {who:'u',label:'You',tx:'Hi! I\'m planning a small birthday dinner for 8 people next Friday.'},
+  {who:'a',label:'AI',tx:'Lovely! Any cuisine in mind, or a budget I should keep to?'},
+  {who:'u',label:'You',tx:'Italian, and let\'s keep it cosy. My friend Mira is vegetarian.'},
+  {who:'a',label:'AI',tx:'Noted — Italian, cosy, with vegetarian options for Mira.'},
+  {who:'u',label:'You',tx:'Can you suggest a starter, a main and a dessert?'},
+  {who:'a',label:'AI',tx:'Sure: bruschetta, a mushroom risotto, and tiramisu.'},
+  {who:'u',label:'You',tx:'Great. Could you also recommend a simple table decoration?'},
+  {who:'a',label:'AI',tx:'A few tea-lights and a sprig of rosemary look warm and simple.'}
+];
+const cwSlider=document.getElementById('cwSlider');
+const cwDesk=document.getElementById('cwDesk');
+const cwSizeLabel=document.getElementById('cwSizeLabel');
+const cwAsk=document.getElementById('cwAsk');
+const cwReply=document.getElementById('cwReply');
+function cwSize(){return parseInt(cwSlider.value,10);}
+function cwRender(){
+  const size=cwSize(); const first=CW.length-size;
+  cwSizeLabel.textContent=size+' messages';
+  cwDesk.innerHTML='';
+  CW.forEach((m,i)=>{
+    const out=i<first;
+    const row=document.createElement('div'); row.className='cw-msg'+(out?' out':'');
+    row.innerHTML=`<span class="who ${m.who}">${m.label}</span><span class="tx">${m.tx}${out?'  — <em>(slipped off the desk)</em>':''}</span>`;
+    cwDesk.appendChild(row);
+  });
+}
+function cwBuildAsk(){
+  cwAsk.innerHTML='';
+  const qs=[[0,'How many guests am I planning for?'],[2,'Who is vegetarian?'],[4,'What did you suggest for dessert?'],[6,'What table decoration did you recommend?']];
+  qs.forEach(q=>{ const o=document.createElement('option'); o.value=q[0]; o.textContent=q[1]; cwAsk.appendChild(o); });
+}
+const CW_ANSWERS={0:'You\'re planning for 8 people.',2:'Your friend Mira is vegetarian.',4:'I suggested tiramisu for dessert.',6:'I recommended tea-lights with a sprig of rosemary.'};
+function cwDoAsk(){
+  const i=parseInt(cwAsk.value,10); const first=CW.length-cwSize();
+  if(i<first){
+    cwReply.className='cw-reply lost';
+    cwReply.innerHTML=`<b>Assistant:</b> Sorry — that part of our chat has slipped off my desk, so I can no longer see it. I\'m not refusing; the text simply wasn\'t included in what reached me.`;
+  } else {
+    cwReply.className='cw-reply ok';
+    cwReply.innerHTML=`<b>Assistant:</b> ${CW_ANSWERS[i]} (Still on the desk, so I can answer.)`;
+  }
+  markDone('s3');
+}
+cwSlider.addEventListener('input',()=>{ cwRender(); cwReply.className='cw-reply'; });
+document.getElementById('cwAskBtn').addEventListener('click',cwDoAsk);
+cwBuildAsk(); cwRender();
+
+/* ============================================================
+   4 · TEMPERATURE
+   ============================================================ */
+const TMP={
+  safe:['The Community Garden Project','Community Garden Project'],
+  mid:['The Green Patch','Neighbourhood Roots','The Garden Collective','Common Ground Garden','The Growing Place'],
+  wild:['Sprout & Gather','The Compost Cathedral','Photosynthesis Social Club','Beetroot Boulevard','Leaf Me Alone Gardens','The Rambling Radish']
+};
+const tmpSlider=document.getElementById('tmpSlider');
+const tmpVal=document.getElementById('tmpVal');
+const tmpKnob=document.getElementById('tmpKnob');
+const tmpMood=document.getElementById('tmpMood');
+const tmpOutputs=document.getElementById('tmpOutputs');
+const tmpConsistency=document.getElementById('tmpConsistency');
+let tmpCount=0, tmpLast=[];
+function tmpT(){return parseInt(tmpSlider.value,10)/100;}
+function tmpDial(){
+  const t=tmpT(); tmpVal.textContent=t.toFixed(2); tmpKnob.style.left=(t*100)+'%';
+  let l,bg,c;
+  if(t<0.25){l='Steady — the reliable latte';bg='var(--blue-light)';c='#2A6FC9';}
+  else if(t<0.6){l='Balanced — a few sensible options';bg='var(--green-light)';c='var(--green-dark)';}
+  else if(t<0.85){l='Creative — inventing new drinks';bg='var(--amber-light)';c='var(--amber-dark)';}
+  else{l='Wild — fun, bold, sometimes odd';bg='var(--red-light)';c='var(--red)';}
+  tmpMood.textContent=l; tmpMood.style.background=bg; tmpMood.style.color=c;
+}
+function tmpPick(){
+  const t=tmpT();
+  if(t<0.25) return t<0.1?TMP.safe[0]:TMP.safe[Math.floor(Math.random()*TMP.safe.length)];
+  if(t<0.6) return TMP.mid[Math.floor(Math.random()*TMP.mid.length)];
+  if(t<0.85) return Math.random()<0.5?TMP.mid[Math.floor(Math.random()*TMP.mid.length)]:TMP.wild[Math.floor(Math.random()*TMP.wild.length)];
+  return TMP.wild[Math.floor(Math.random()*TMP.wild.length)];
+}
+function tmpGenerate(){
+  if(tmpCount===0){ tmpOutputs.innerHTML=''; tmpLast=[]; }
+  const out=tmpPick(); tmpLast.push(out);
+  const d=document.createElement('div'); d.className='tmp-output'; d.textContent='“'+out+'”'; tmpOutputs.appendChild(d);
+  tmpCount++;
+  while(tmpOutputs.children.length>4) tmpOutputs.removeChild(tmpOutputs.children[0]);
+  const recent=tmpLast.slice(-4); const unique=new Set(recent).size;
+  let msg;
+  if(recent.length<2) msg='Generate a few times to feel the consistency change.';
+  else if(unique===1) msg='<b>Identical every time.</b> Low temperature is dependable — what you want for facts.';
+  else if(unique<=2) msg='<b>Mostly consistent,</b> with a little variation.';
+  else msg='<b>Different each time.</b> Great for ideas — risky for anything that must be exact.';
+  tmpConsistency.innerHTML=msg;
+  markDone('s4');
+}
+tmpSlider.addEventListener('input',()=>{ tmpDial(); tmpCount=0; });
+document.getElementById('tmpGen').addEventListener('click',tmpGenerate);
+document.getElementById('tmpClear').addEventListener('click',()=>{ tmpCount=0; tmpLast=[]; tmpOutputs.innerHTML='<div class="tmp-output empty">Press "Generate a name" to begin →</div>'; tmpConsistency.innerHTML=''; });
+tmpDial();
+
+/* ============================================================
+   SCROLL REVEAL + STATION NAV
+   ============================================================ */
+const io=new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); },{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+const navLinks=document.querySelectorAll('.station-nav a');
+const sections=[...document.querySelectorAll('section.station')];
+const navIO=new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ navLinks.forEach(a=>a.classList.toggle('active',a.dataset.s===e.target.id)); } }); },{rootMargin:'-45% 0px -50% 0px'});
+sections.forEach(s=>navIO.observe(s));
+</script>
+</body>
+</html>

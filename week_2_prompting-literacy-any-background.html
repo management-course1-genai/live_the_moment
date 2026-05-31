@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompting Is a Literacy — Learn by Doing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--green-dark:#388E3C;
+  --red:#D9534F;--red-light:#FBEAEA;--amber:#E8A040;--blue:#4285F4;--blue-glow:rgba(66,133,244,0.1);
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);--shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;--mono:'JetBrains Mono',ui-monospace,monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(43,45,66,0.04) 1px,transparent 1px);background-size:22px 22px}
+.wrap{position:relative;z-index:1}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 2rem;height:66px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-brand{display:flex;align-items:center;gap:.7rem}
+.nav-brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.nav-brand .mark svg{width:18px;height:18px;color:#fff}
+.nav-brand-text{display:flex;flex-direction:column;line-height:1.1}
+.nav-brand-name{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)}
+.nav-brand-name span{color:var(--orange)}
+.nav-brand-tag{font-size:.6rem;color:var(--text-muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.nav-logo{height:46px;width:auto;display:block;filter:drop-shadow(0 4px 10px rgba(43,45,66,0.12))}
+
+/* HERO */
+.hero{padding:4.2rem 2rem 2.5rem;position:relative}
+.hero-inner{max-width:940px;margin:0 auto;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.4rem}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.13;color:var(--navy);margin-bottom:1.1rem}
+.hero h1 em{font-style:italic;color:var(--orange)}
+.hero-sub{font-size:1.04rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto 1.4rem}
+.hero-analogy{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.4rem}
+.analogy-chip{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.5rem 1rem;font-size:.76rem;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:.45rem;box-shadow:var(--shadow-sm)}
+.analogy-chip svg{width:14px;height:14px;color:var(--orange)}
+.scroll-hint{margin-top:2rem;display:inline-flex;flex-direction:column;align-items:center;gap:.3rem;font-size:.72rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.scroll-hint svg{width:20px;height:20px;color:var(--orange);animation:bob 1.8s infinite}
+
+/* SECTIONS */
+section{padding:3.2rem 2rem;position:relative}
+.container{max-width:940px;margin:0 auto}
+.section-head{margin-bottom:1.8rem}
+.section-kicker{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:.6rem}
+.section-kicker .n{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-family:var(--mono)}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,3.2vw,2.2rem);color:var(--navy);line-height:1.2;margin-bottom:.5rem}
+.section-sub{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:660px}
+
+/* PERSONA PICKER */
+.persona-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:.5rem}
+.persona{background:var(--bg-card);border:2px solid var(--border);border-radius:var(--radius);padding:1.4rem 1rem;text-align:center;cursor:pointer;transition:all .28s cubic-bezier(.25,.46,.45,.94);position:relative;overflow:hidden}
+.persona::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.persona:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--orange)}
+.persona:hover::before,.persona.active::before{transform:scaleX(1)}
+.persona.active{border-color:var(--orange);background:var(--orange-glow)}
+.persona-ico{width:54px;height:54px;border-radius:14px;background:var(--orange-glow);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;margin-bottom:.8rem;transition:transform .3s}
+.persona:hover .persona-ico{transform:scale(1.08)}
+.persona.active .persona-ico{background:var(--orange);color:#fff}
+.persona-ico svg{width:26px;height:26px}
+.persona h3{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.25rem;line-height:1.2}
+.persona p{font-size:.72rem;color:var(--text-secondary);line-height:1.45}
+.persona-check{position:absolute;top:.6rem;right:.6rem;width:20px;height:20px;border-radius:50%;background:var(--orange);color:#fff;display:none;align-items:center;justify-content:center}
+.persona.active .persona-check{display:flex}
+.persona-check svg{width:12px;height:12px}
+
+/* CASE BANNER */
+.usecase{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:1.7rem 2rem;color:#fff;display:flex;gap:1.3rem;align-items:flex-start;position:relative;overflow:hidden;box-shadow:var(--shadow-md)}
+.usecase::after{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;border-radius:50%;background:rgba(232,122,46,0.14)}
+.usecase-ico{width:50px;height:50px;border-radius:13px;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(232,122,46,0.35);position:relative;z-index:1}
+.usecase-ico svg{width:26px;height:26px;color:#fff}
+.usecase-body{position:relative;z-index:1}
+.usecase-body .lbl{font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--orange-light);margin-bottom:.3rem}
+.usecase-body h3{font-family:'DM Serif Display',serif;font-size:1.22rem;margin-bottom:.4rem}
+.usecase-body p{font-size:.86rem;color:rgba(255,255,255,0.74);line-height:1.6}
+
+/* LAB / TABS */
+.lab{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;margin-top:1.4rem}
+.lab-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg-light);overflow-x:auto}
+.lab-tab{flex:1;min-width:130px;padding:1rem .8rem;border:none;background:none;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;color:var(--text-muted);transition:all .2s;border-bottom:3px solid transparent;display:flex;flex-direction:column;align-items:center;gap:.25rem;white-space:nowrap}
+.lab-tab .tnum{font-family:var(--mono);font-size:.62rem;opacity:.6}
+.lab-tab:hover{color:var(--navy);background:rgba(232,122,46,0.04)}
+.lab-tab.active{color:var(--orange);border-bottom-color:var(--orange);background:var(--bg-card)}
+.lab-panel{display:none;padding:1.7rem}
+.lab-panel.active{display:block;animation:fadeUp .4s ease}
+.lab-def{display:flex;gap:.7rem;align-items:flex-start;background:var(--orange-glow);border-radius:var(--radius-sm);padding:.9rem 1.1rem;margin-bottom:1.2rem}
+.lab-def .badge{font-family:var(--mono);font-size:.62rem;font-weight:700;background:var(--orange);color:#fff;padding:.2rem .5rem;border-radius:5px;flex-shrink:0;text-transform:uppercase;letter-spacing:.05em}
+.lab-def p{font-size:.84rem;color:var(--navy);line-height:1.6}
+.lab-def p b{color:var(--orange-dark)}
+
+.io-block{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.io-head{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--bg-light);border-bottom:1px solid var(--border)}
+.io-head .ttl{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);display:flex;align-items:center;gap:.4rem}
+.io-head .ttl svg{width:13px;height:13px;opacity:.6}
+.io-prompt{padding:.9rem 1rem;font-family:var(--mono);font-size:.77rem;line-height:1.65;color:var(--navy);white-space:pre-wrap;background:var(--bg-card)}
+.io-prompt .ex{color:var(--green-dark)}
+.io-prompt .role{color:var(--orange-dark);font-weight:700}
+.io-prompt .src{color:var(--text-secondary);font-style:italic}
+
+.run-row{display:flex;align-items:center;gap:.8rem;margin:1.1rem 0;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.45rem;padding:.62rem 1.3rem;border-radius:9px;font-size:.84rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn svg{width:15px;height:15px}
+.btn-run{background:var(--orange);color:#fff}
+.btn-run:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,122,46,0.3)}
+
+.terminal{background:var(--navy-dark);border-radius:var(--radius-sm);overflow:hidden;border:1px solid #2c2e44}
+.term-head{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;background:#15162a;border-bottom:1px solid #2c2e44}
+.term-dots{display:flex;gap:.35rem}.term-dots i{width:10px;height:10px;border-radius:50%;display:block}
+.term-dots i:nth-child(1){background:#ff5f57}.term-dots i:nth-child(2){background:#febc2e}.term-dots i:nth-child(3){background:#28c840}
+.term-title{font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,0.5);margin-left:.3rem}
+.term-body{padding:1rem 1.1rem;font-family:var(--mono);font-size:.77rem;line-height:1.7;color:#d7d8e8;min-height:60px;white-space:pre-wrap;word-break:break-word}
+.term-body .empty{color:rgba(255,255,255,0.35)}
+.term-body .k{color:#f5943e}.term-body .v{color:#a9e3b6}.term-body .warn-inline{color:#ffb3b0}
+.term-body .cursor{display:inline-block;width:8px;height:1.05em;background:var(--orange);vertical-align:text-bottom;animation:blink 1s steps(1) infinite}
+
+.insight{display:flex;gap:.7rem;align-items:flex-start;margin-top:1.1rem;background:var(--bg-light);border-left:3px solid var(--green);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.85rem 1rem}
+.insight.warn{border-left-color:var(--red)}
+.insight .ico{flex-shrink:0;width:22px;height:22px;border-radius:6px;background:var(--green-light);display:flex;align-items:center;justify-content:center}
+.insight.warn .ico{background:var(--red-light)}
+.insight .ico svg{width:13px;height:13px;color:var(--green-dark)}.insight.warn .ico svg{color:var(--red)}
+.insight p{font-size:.82rem;color:var(--text-secondary);line-height:1.6}.insight p b{color:var(--navy)}
+
+/* role buttons */
+.role-pick{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem}
+.role-btn{padding:.5rem .9rem;border-radius:50px;border:1.5px solid var(--border);background:var(--bg-light);font-family:inherit;font-size:.76rem;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:all .2s}
+.role-btn:hover{border-color:var(--orange);color:var(--orange)}
+.role-btn.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+/* FEW-SHOT DIAL */
+.dial-top{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem}
+.dial-switch{display:inline-flex;background:var(--bg-light);border:1.5px solid var(--border);border-radius:10px;padding:3px;gap:3px}
+.dial-switch button{border:none;background:none;font-family:inherit;font-size:.78rem;font-weight:700;color:var(--text-secondary);padding:.5rem 1rem;border-radius:7px;cursor:pointer;transition:all .2s}
+.dial-switch button.active{background:var(--orange);color:#fff;box-shadow:0 2px 8px rgba(232,122,46,0.3)}
+.dial-acc{display:flex;align-items:center;gap:.6rem;font-size:.78rem;font-weight:700;color:var(--navy)}
+.dial-acc .meter{width:120px;height:8px;border-radius:5px;background:var(--border);overflow:hidden}
+.dial-acc .meter i{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--green));border-radius:5px;width:0;transition:width .5s ease}
+.dial-acc .pct{font-family:var(--mono);color:var(--orange);min-width:42px}
+.dial-items{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.dial-item{border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem .9rem;background:var(--bg-card);transition:all .2s}
+.dial-item .di-text{font-size:.8rem;color:var(--navy);line-height:1.45;margin-bottom:.55rem}
+.dial-item .di-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.di-label{font-family:var(--mono);font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:50px;background:var(--bg-light);border:1px solid var(--border);color:var(--text-secondary)}
+.di-verdict{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;font-weight:700}
+.di-verdict svg{width:12px;height:12px}
+.di-verdict.ok{color:var(--green-dark)}.di-verdict.bad{color:var(--red)}
+.dial-item.bad{border-left:3px solid var(--red)}.dial-item.ok{border-left:3px solid var(--green)}
+
+/* SYSTEM BUILDER */
+.builder{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.4rem}
+.builder-col{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+.builder-col-head{padding:1rem 1.3rem;border-bottom:1px solid var(--border);background:var(--bg-light);font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);display:flex;align-items:center;gap:.5rem}
+.builder-col-head svg{width:15px;height:15px;color:var(--orange)}
+.toggles{padding:1.1rem 1.3rem;display:flex;flex-direction:column;gap:.7rem}
+.toggle{display:flex;align-items:flex-start;gap:.8rem;padding:.7rem .85rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;background:var(--bg-light)}
+.toggle:hover{border-color:var(--orange-light)}
+.toggle.on{border-color:var(--orange);background:var(--orange-glow)}
+.toggle .sw{flex-shrink:0;width:38px;height:22px;border-radius:50px;background:var(--border);position:relative;transition:background .2s;margin-top:1px}
+.toggle.on .sw{background:var(--orange)}
+.toggle .sw::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on .sw::after{transform:translateX(16px)}
+.toggle .t-name{font-size:.82rem;font-weight:700;color:var(--navy)}
+.toggle .t-desc{font-size:.72rem;color:var(--text-muted);line-height:1.45;margin-top:.1rem}
+.sys-preview{padding:1.1rem 1.3rem}
+.sys-preview-label{font-family:var(--mono);font-size:.66rem;color:var(--text-muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+.sys-box{background:var(--navy-dark);border-radius:var(--radius-sm);padding:1rem;font-family:var(--mono);font-size:.73rem;line-height:1.7;color:#d7d8e8;min-height:120px}
+.sys-box .seg{display:block;margin-bottom:.55rem}.sys-box .seg .lab{color:var(--orange-light);font-weight:700}
+.sys-box .seg.role .txt{color:#a9e3b6}.sys-box .ghost{color:rgba(255,255,255,0.3);font-style:italic}
+.try-row{padding:0 1.3rem 1.3rem}
+.try-label{font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);margin:.4rem 0 .6rem}
+.try-msgs{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.try-msg{text-align:left;border:1.5px solid var(--border);background:var(--bg-light);border-radius:var(--radius-sm);padding:.6rem .8rem;cursor:pointer;font-family:inherit;font-size:.78rem;color:var(--navy);transition:all .2s;display:flex;gap:.5rem;align-items:flex-start;line-height:1.45}
+.try-msg:hover{border-color:var(--orange);background:var(--orange-glow)}
+.try-msg.active{border-color:var(--orange);background:var(--orange-glow);font-weight:600}
+.try-msg .who{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#fff;background:var(--text-muted);padding:.15rem .4rem;border-radius:4px;flex-shrink:0;margin-top:1px}
+.try-msg.risk .who{background:var(--red)}
+
+/* QUIZ */
+.quiz{margin-top:1.4rem;display:flex;flex-direction:column;gap:1rem}
+.q-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1.3rem 1.5rem}
+.q-num{font-family:var(--mono);font-size:.66rem;font-weight:700;color:var(--orange);margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+.q-tag{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:var(--bg-light);border:1px solid var(--border);color:var(--text-secondary);padding:.15rem .5rem;border-radius:50px}
+.q-text{font-size:.92rem;font-weight:600;color:var(--navy);margin-bottom:1rem;line-height:1.5}
+.q-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.q-opt{border:1.5px solid var(--border);background:var(--bg-light);border-radius:var(--radius-sm);padding:.6rem .4rem;font-family:inherit;font-size:.76rem;font-weight:700;color:var(--text-secondary);cursor:pointer;transition:all .2s;text-align:center}
+.q-opt:hover{border-color:var(--orange);color:var(--orange)}
+.q-opt.correct{border-color:var(--green);background:var(--green-light);color:var(--green-dark)}
+.q-opt.wrong{border-color:var(--red);background:var(--red-light);color:var(--red)}
+.q-opt:disabled{cursor:default}
+.q-feedback{margin-top:.85rem;font-size:.82rem;line-height:1.6;color:var(--text-secondary);padding:.7rem .9rem;border-radius:var(--radius-sm);background:var(--bg-light);border-left:3px solid var(--orange);display:none}
+.q-feedback.show{display:block;animation:fadeUp .35s ease}.q-feedback b{color:var(--navy)}
+
+/* TAKEAWAY */
+.takeaway{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.5rem;text-align:center;position:relative;overflow:hidden;margin-top:1rem}
+.takeaway::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(232,122,46,0.1)}
+.takeaway::after{content:'';position:absolute;bottom:-40px;left:-40px;width:150px;height:150px;border-radius:50%;background:rgba(76,175,80,0.08)}
+.takeaway h2{font-family:'DM Serif Display',serif;font-size:clamp(1.4rem,2.5vw,1.9rem);color:#fff;margin-bottom:.7rem;position:relative;z-index:1}
+.takeaway p{color:rgba(255,255,255,0.7);font-size:.94rem;line-height:1.7;max-width:560px;margin:0 auto 1.6rem;position:relative;z-index:1}
+.takeaway-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;max-width:560px;margin:0 auto;position:relative;z-index:1;text-align:left}
+.take-item{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);padding:.9rem 1rem}
+.take-item .nm{font-size:.82rem;font-weight:700;color:var(--orange-light);margin-bottom:.2rem}
+.take-item .ds{font-size:.74rem;color:rgba(255,255,255,0.65);line-height:1.5}
+
+footer{padding:2rem;text-align:center;border-top:1px solid var(--border);background:var(--bg-card);margin-top:2rem}
+.footer-brand{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.3rem}
+.footer-brand span{color:var(--orange)}
+.footer-copy{font-size:.74rem;color:var(--text-muted)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes blink{50%{opacity:0}}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+@media(max-width:820px){
+  .persona-grid{grid-template-columns:repeat(2,1fr)}
+  .dial-items{grid-template-columns:1fr}
+  .builder{grid-template-columns:1fr}
+  .q-opts{grid-template-columns:repeat(2,1fr)}
+  .takeaway-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .nav{padding:0 1.2rem}.nav-logo{height:38px}
+  section{padding:2.4rem 1.2rem}.hero{padding:2.8rem 1.2rem 1.8rem}
+  .lab-panel{padding:1.2rem}.nav-brand-tag{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7l9 5 9-5-9-5z"/><path d="M3 17l9 5 9-5"/><path d="M3 12l9 5 9-5"/></svg></span>
+    <span class="nav-brand-text"><span class="nav-brand-name">Moksh<span>Path</span></span><span class="nav-brand-tag">Prompting Literacy · Week 1</span></span>
+  </div>
+  <img class="nav-logo" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTU1IiBoZWlnaHQ9IjE0ODYiIHZpZXdCb3g9IjAgMCA5NTUgMTQ4NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik00OTMuNDc3IDMxNC4yNzVINDYwLjc5NUM0NTYuOTkgMzE0LjI3NSA0NTMuOTA2IDMxNy4zNTYgNDUzLjkwNiAzMjEuMTU1QzQ1My45MDYgMzI0Ljk1NSA0NTYuOTkgMzI4LjAzNSA0NjAuNzk1IDMyOC4wMzVINDkzLjQ3N0M0OTcuMjgyIDMyOC4wMzUgNTAwLjM2NiAzMjQuOTU1IDUwMC4zNjYgMzIxLjE1NUM1MDAuMzY2IDMxNy4zNTYgNDk3LjI4MiAzMTQuMjc1IDQ5My40NzcgMzE0LjI3NVoiIGZpbGw9IiNFRjdGMUEiLz4NCjxwYXRoIGQ9Ik00OTMuNDc3IDMzMy44ODFINDYwLjc5NUM0NTYuOTkgMzMzLjg4MSA0NTMuOTA2IDMzNi45NjEgNDUzLjkwNiAzNDAuNzYxQzQ1My45MDYgMzQ0LjU2MSA0NTYuOTkgMzQ3LjY0MSA0NjAuNzk1IDM0Ny42NDFINDkzLjQ3N0M0OTcuMjgyIDM0Ny42NDEgNTAwLjM2NiAzNDQuNTYxIDUwMC4zNjYgMzQwLjc2MUM1MDAuMzY2IDMzNi45NjEgNDk3LjI4MiAzMzMuODgxIDQ5My40NzcgMzMzLjg4MVoiIGZpbGw9IiNFRjdGMUEiLz4NCjxwYXRoIGQ9Ik00OTMuNDc3IDM1My40ODZINDYwLjc5NUM0NTYuOTkgMzUzLjQ4NiA0NTMuOTA2IDM1Ni41NjcgNDUzLjkwNiAzNjAuMzY2QzQ1My45MDYgMzY0LjE2NiA0NTYuOTkgMzY3LjI0NiA0NjAuNzk1IDM2Ny4yNDZINDkzLjQ3N0M0OTcuMjgyIDM2Ny4yNDYgNTAwLjM2NiAzNjQuMTY2IDUwMC4zNjYgMzYwLjM2NkM1MDAuMzY2IDM1Ni41NjcgNDk3LjI4MiAzNTMuNDg2IDQ5My40NzcgMzUzLjQ4NloiIGZpbGw9IiNFRjdGMUEiLz4NCjxwYXRoIGQ9Ik02NjAuOTkxIDEzMTYuMjNIMjk5LjRWMTQ3OC43SDY2MC45OTFWMTMxNi4yM1oiIGZpbGw9IiMyRjFEMTkiLz4NCjxwYXRoIGQ9Ik02NjAuOTkxIDEwMTYuMTJIMjk5LjRWMTE3OC42SDY2MC45OTFWMTAxNi4xMloiIGZpbGw9IiNBMzRFMUMiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNDc1LjMwNiA3MzkuNjA3QzUwNC42NTUgNzM5LjYwNyA1MzEuNzQ4IDc0Ni44MDQgNTU1LjYxIDc1OS42MjRDNTQzLjMwMyA3NzcuMDc2IDUxMi4xNTkgNzg5LjQ2OCA0NzUuNjgyIDc4OS40NjhDNDM5IDc4OS40NjggNDA3LjcwMiA3NzYuOTM5IDM5NS41NDkgNzU5LjMzM0M0MTkuMjU3IDc0Ni42ODQgNDQ2LjE3OSA3MzkuNjA3IDQ3NS4zMDYgNzM5LjYwN1oiIGZpbGw9IiNEOURBREEiLz4NCjxwYXRoIGQ9Ik03NDAuODMyIDQ5MC41NzVDNzc4LjAxOCA0OTAuNTc1IDgwOC4xNjIgNDU0LjA4NiA4MDguMTYyIDQwOS4wNzVDODA4LjE2MiAzNjQuMDYzIDc3OC4wMTggMzI3LjU3NCA3NDAuODMyIDMyNy41NzRDNzAzLjY0NyAzMjcuNTc0IDY3My41MDIgMzY0LjA2MyA2NzMuNTAyIDQwOS4wNzVDNjczLjUwMiA0NTQuMDg2IDcwMy42NDcgNDkwLjU3NSA3NDAuODMyIDQ5MC41NzVaIiBmaWxsPSIjRDlEQURBIi8+DQo8cGF0aCBkPSJNMjEwLjU0OSA0OTAuNTc1QzI0Ny43MzQgNDkwLjU3NSAyNzcuODc5IDQ1NC4wODYgMjc3Ljg3OSA0MDkuMDc1QzI3Ny44NzkgMzY0LjA2MyAyNDcuNzM0IDMyNy41NzQgMjEwLjU0OSAzMjcuNTc0QzE3My4zNjQgMzI3LjU3NCAxNDMuMjE5IDM2NC4wNjMgMTQzLjIxOSA0MDkuMDc1QzE0My4yMTkgNDU0LjA4NiAxNzMuMzY0IDQ5MC41NzUgMjEwLjU0OSA0OTAuNTc1WiIgZmlsbD0iI0Q5REFEQSIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNDUuMSA0MjguMjdDMTUyLjIyNyA0NjQuMDExIDE3OC44MjUgNDkwLjU3NCAyMTAuNTUgNDkwLjU3NEMyNDIuMjc1IDQ5MC41NzQgMjY4Ljg3MiA0NjQuMDExIDI3NiA0MjguMjdDMjU4LjAxNyA0MzguNjQ1IDIzNS4yODQgNDQ0Ljg1IDIxMC41NSA0NDQuODVDMTg1LjgxNiA0NDQuODUgMTYzLjA2NSA0MzguNjQ1IDE0NS4xIDQyOC4yN1oiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl82NTI0XzQ0MTUpIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQ3NS43IDU3LjYyMTFDNjUyLjg1NCA1Ny42MjExIDc1OS4xMjMgMTg0LjcyNiA3NTkuMTIzIDM1NS40ODhDNzU5LjEyMyA1MjYuMjQ5IDY5OS4yMjggNzAzLjg0OCA0NzUuNyA3MDMuODQ4QzI1Mi4xNTQgNzAzLjg0OCAxOTIuMjYgNTI2LjI0OSAxOTIuMjYgMzU1LjQ4OEMxOTIuMjYgMTg0LjcyNiAyOTguNTQ1IDU3LjYyMTEgNDc1LjcgNTcuNjIxMVoiIGZpbGw9InVybCgjcGFpbnQxX3JhZGlhbF82NTI0XzQ0MTUpIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTY5MC4wODMgMTQ5LjYxN0M3MzQuODE2IDIwMi4xNzkgNzU5LjEyMyAyNzMuODM0IDc1OS4xMjMgMzU1LjQ4OEM3NTkuMTIzIDUyNi4yNDkgNjk5LjIyOCA3MDMuODQ4IDQ3NS43IDcwMy44NDhDMjUyLjE1NCA3MDMuODQ4IDE5Mi4yNiA1MjYuMjQ5IDE5Mi4yNiAzNTUuNDg4QzE5Mi4yNiAyODAuMjQ0IDIxMi44OTEgMjEzLjQ5NSAyNTEuMTI5IDE2Mi4zNTJDMjM5Ljg2NCAxOTMuODcyIDIzMy42NDIgMjI4LjM0OSAyMzMuNjQyIDI2NC40NjdDMjMzLjY0MiA0MTQuNTc5IDM0MC44MzQgNTM2LjI4MyA0NzMuMDUgNTM2LjI4M0M2MDUuMjgzIDUzNi4yODMgNzEyLjQ3NSA0MTQuNTc5IDcxMi40NzUgMjY0LjQ2N0M3MTIuNDc1IDIyMy40MjYgNzA0LjQ0MSAxODQuNTA0IDY5MC4wODMgMTQ5LjYxN1oiIGZpbGw9InVybCgjcGFpbnQyX2xpbmVhcl82NTI0XzQ0MTUpIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQ3Ny41NDYgMTY4LjkzMkM2MzMuNDAyIDE2OC45MzIgNzA5LjYzOCAyMzguMTA4IDcxMi44MzQgMzc2LjA2N0M3MTYuMDMxIDUxNC4wMSA2NjYuMTM2IDYxOC4zMTMgNDc3LjU0NiA2MTguMzEzQzI4OC45NzMgNjE4LjMxMyAyMzcuMTY0IDUyOC4wOTUgMjM4LjQyOSAzNzYuMDY3QzIzOS43MTEgMjI0LjA0IDMyMS43MDcgMTY4LjkzMiA0NzcuNTQ2IDE2OC45MzJaIiBmaWxsPSJ1cmwoI3BhaW50M19yYWRpYWxfNjUyNF80NDE1KSIvPg0KPG1hc2sgaWQ9Im1hc2swXzY1MjRfNDQxNSIgc3R5bGU9Im1hc2stdHlwZTpsdW1pbmFuY2UiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjM3NyIgeT0iMTY4IiB3aWR0aD0iMzI2IiBoZWlnaHQ9IjQ1MSI+DQo8cGF0aCBkPSJNNzAyLjYxMiAxNjguMzM0SDM3Ny4zNzlWNjE4LjgyNkg3MDIuNjEyVjE2OC4zMzRaIiBmaWxsPSJ1cmwoI3BhaW50NF9saW5lYXJfNjUyNF80NDE1KSIvPg0KPC9tYXNrPg0KPGcgbWFzaz0idXJsKCNtYXNrMF82NTI0XzQ0MTUpIj4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNTAxLjI1NCAxNjkuNTE0QzYyMy41MDUgMTc3LjQ0NSA2OTguMjE5IDI0MS43MTUgNzAxLjM0NyAzNzYuMDY4QzcwNC40NTggNTEwLjQyMSA2MTYuMzc3IDYxNy42NDcgNTAyLjg2MSA2MTcuNjQ3QzM4OS4zNjIgNjE3LjY0NyA0MDYuMzM1IDYxNC41NTMgMzc4LjU1OSA2MDcuMjg4QzQ4My4yMiA1OTIuMzgzIDU2NC40NDcgNDg0LjA2MyA1NjQuNDQ3IDM1Mi42MzNDNTY0LjQ0NyAyODAuODkzIDU0MC4yNDMgMjE2LjA1OSA1MDEuMjU0IDE2OS41MTRaIiBmaWxsPSJ1cmwoI3BhaW50NV9saW5lYXJfNjUyNF80NDE1KSIvPg0KPC9nPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03NDcuNzU1IDQ3NS4wNzJDNzIxLjc1NiA2MDAuMTc4IDY0Ni40NzggNzAzLjg0OCA0NzUuNjk5IDcwMy44NDhDMzA0LjkwNCA3MDMuODQ4IDIyOS42NDIgNjAwLjE3OCAyMDMuNjI2IDQ3NS4wNzJIMjAyLjg0QzIzMC42NjggNTkyLjc5MyAzMTUuNjcyIDY2NC4yNiA0NzMuMzA2IDY2Ny44ODRDNjI4LjQ0NCA2NzEuNDM5IDcxNy41MTcgNTg4LjIxMiA3NDcuNDk5IDQ3NS4wNzJINzQ3Ljc1NVoiIGZpbGw9IiM4OTg5ODkiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNDI2LjI4MyA0MzQuNjEzQzQxNi4yODQgNDQzLjA5MiA0MDMuMzQ0IDQ0OC4yMDIgMzg5LjIwOCA0NDguMjAyQzM3NS4wNzIgNDQ4LjIwMiAzNjIuMTMyIDQ0My4wOTIgMzUyLjEzMyA0MzQuNjEzSDQyNi4yODNaIiBmaWxsPSIjMDA4REQyIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTYwMi4wODYgNDM0LjYxM0M1OTIuMDg3IDQ0My4wOTIgNTc5LjE0NyA0NDguMjAyIDU2NS4wMTEgNDQ4LjIwMkM1NTAuODkyIDQ0OC4yMDIgNTM3Ljk1MyA0NDMuMDkyIDUyNy45NTMgNDM0LjYxM0g2MDIuMDg2WiIgZmlsbD0iIzAwOEREMiIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03MTkuNTUyIDEyMjguNzFDNzE5LjU1MiAxMjI4LjcxIDgzNy40MSAxMjEzLjk4IDkwNi4yNDQgMTI2Ni45NUM5NzUuMDk2IDEzMTkuOTEgOTY4LjM5NSAxNDAzLjMyIDg5NS45MDMgMTQ0Ni45OUM4MjMuNDEgMTQ5MC42OCA3MTguMzU1IDE0OTIuMTUgNjIyLjYzMyAxNDc4LjA5QzUyNi44OTQgMTQ2NCA1MjkuMDk5IDE0NDIuMSAzNjkuMjQzIDE0NzEuMzJDMTc4Ljg5MyAxNTA2LjEgMTAuNzEyNSAxNDc0Ljk2IDAuOTE4MDkzIDEzNzUuNDZDLTguODc2MzMgMTI3NS45NCA2MS4zNDI3IDEyNDMuNjkgMTMyLjk0NiAxMjM3LjA5QzIwNC41NSAxMjMwLjQ3IDQwMy4zNjEgMTI0Ny4zNiA0NTYuMzMzIDEyNjIuMjNDNTA5LjMyMiAxMjc3LjEgNzE5LjU1MiAxMjI4LjcxIDcxOS41NTIgMTIyOC43MVoiIGZpbGw9IiNFRjdGMUEiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTQuOTUxNiAxNDE0LjY5QzcuMTkxMzEgMTQwMy4wNiAyLjMzNjgzIDEzODkuOTkgMC45MTgwOTMgMTM3NS40NkMtOC44NzYzMyAxMjc1Ljk0IDYxLjM0MjcgMTI0My42OSAxMzIuOTQ2IDEyMzcuMDlDMjA0LjU1IDEyMzAuNDcgNDAzLjM2MSAxMjQ3LjM2IDQ1Ni4zMzMgMTI2Mi4yM0M0ODQuMDQxIDEyNzAuMDEgNTU0LjczOSAxMjYwLjQ5IDYxNS44ODEgMTI0OS42M0M2MjIuODM4IDEyNTMuMTQgNjI4LjIyMyAxMjU2LjM5IDYyOS4yMTQgMTI1OC41MUM2MzMuMDQzIDEyNjYuOCA2MDMuODk5IDEzMTcuNiA1OTUuOTY4IDEzMjIuNjFDNTg4LjAzNiAxMzI3LjYzIDUyMC40NjcgMTM3OS4zNCA0OTYuMjk3IDEzODkuNTZDNDcyLjE0NCAxMzk5Ljc4IDIxOS4zMzUgMTQ2Ny42NCAxNzQuNzIyIDE0NTYuNDhDMTUwLjA5MSAxNDUwLjMzIDc1LjYzMjYgMTQzNi4yNCAxNC45NTE2IDE0MTQuNjlaIiBmaWxsPSIjRUY3RjFBIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTI0LjY0MjYgMTI4My4xMkM0OS44NTUxIDEyNTMuNTMgOTEuMTY5NCAxMjQwLjkzIDEzMi45NDUgMTIzNy4wOUMxNzAuODkyIDEyMzMuNTggMjQ0LjU2NCAxMjM2LjY4IDMxMy4zMTMgMTI0Mi41N0MzMTguNDc1IDEyNDQuNjYgMzIzLjU1MiAxMjQ2Ljk1IDMyOC40NDEgMTI0OS41M0MyOTguMzU2IDEyNjEuMDUgMjg0LjMyMyAxMjUyLjg1IDIxMy4yNDkgMTMxOC44MUMxNDIuMTkzIDEzODQuNzYgNjEuMTcwOCAxMzUwLjIzIDQ1LjIyMjggMTMzMS41NkMzMS45NzU2IDEzMTYuMDggMjUuMzk0NyAxMjk4LjkgMjQuNjQyNiAxMjgzLjEyWiIgZmlsbD0iI0ZGOTQyOSIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03MTkuNTUxIDEyMjguNzFDNzE5LjU1MSAxMjI4LjcxIDgzNy40MDkgMTIxMy45OCA5MDYuMjQzIDEyNjYuOTVDOTE1LjM1NCAxMjczLjk2IDkyMy4xMzIgMTI4MS41IDkyOS42MSAxMjg5LjQxQzkzMS41MjQgMTMwNi4zNyA5MjguNTMzIDEzMjAuODUgOTE2LjQxNCAxMzI4LjIxQzg3My42NDcgMTM1NC4yNSA3OTAuMDA5IDEzNzAuOTggNzMzLjMxMSAxMzEyLjQyQzY5OC4wNjUgMTI3Ni4wMyA2NjEuMzgzIDEyNTcuNTggNjMxLjI5OSAxMjQ2LjgzQzY4MC4yMiAxMjM3Ljc2IDcxOS41NTEgMTIyOC43MSA3MTkuNTUxIDEyMjguNzFaIiBmaWxsPSIjRkY5NDI5Ii8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTk1My43ODEgMTM0NS4wMkM5NTcuNzEyIDEzODMuMjUgOTM3Ljc5OSAxNDIxLjc2IDg5NS45MDMgMTQ0Ni45OUM4MjMuNDExIDE0OTAuNjggNzE4LjM1NiAxNDkyLjE1IDYyMi42MzQgMTQ3OC4wOUM2MDkuMTgyIDE0NzYuMSA1OTcuNjYxIDE0NzMuOTcgNTg3LjM3MSAxNDcxLjg1QzUzNS4zNTYgMTQ0My4zOSA1NDcuOTU0IDE0MTEuMjIgNTQ3Ljk1NCAxNDExLjIyTDQyNS41NjYgMTQ2Mi4xN0M0MDkuMjkzIDE0NjQuMzkgMzkwLjc0NyAxNDY3LjM5IDM2OS4yNDQgMTQ3MS4zMkMzMTguNDYgMTQ4MC42IDI2OS4yNjYgMTQ4NS4xOCAyMjQuMjI1IDE0ODUuMDNDMTkyLjYwMiAxNDgyLjM5IDE1Ny44NjkgMTQ3OS4xMSAxMjMuNDI2IDE0NzUuMTFDNTMuMDAxOSAxNDU5LjggNS45NjEzOCAxNDI2LjY5IDAuOTE4ODc1IDEzNzUuNDZDLTAuMjk0NzQ1IDEzNjMuMDggLTAuMjc3NjUyIDEzNTEuNzcgMC44MTYzMTUgMTM0MS4zOUMxMTMuOTIyIDE0MjYuNTMgMzE5LjIyOSAxNDAxLjY4IDQzMy4yMjQgMTM4OS4zOUM1NTAuNzU3IDEzNzYuNzIgNjI4LjM5NCAxMjgzLjI0IDYyOC4zOTQgMTI4My4yNEw1NjQuMTQxIDEzOTYuNDNDNTY0LjE0MSAxMzk2LjQzIDY3OS41NzEgMTQxMi42MiA4MDMuNDYzIDEzOTkuOTVDODgxLjY4MiAxMzkxLjk1IDkyOS4yODYgMTM2NC4zMSA5NTMuNzgxIDEzNDUuMDJaIiBmaWxsPSIjRDU1MjIyIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQ4Ny4yMjEgMTQ1Ni45MUM0NTguOTY2IDE0NjEuNjggNDMxLjAzNSAxNDYyLjM5IDM5My44NTcgMTQ2Ny4wMUM0NDguNzc4IDE0NTAuMTkgNTEwLjQ1IDE0MjEuMiA1NTMuODg0IDEzNzguMjRDNTk3LjMwMSAxMzM1LjI5IDYyOC44ODkgMTI3OC4xOCA2MjguODg5IDEyNzguMThDNjI4Ljg4OSAxMjkxLjU1IDYwOC40NjMgMTM2Ny4wNiA1NzMuMjg1IDEzOTkuMjNDNTM4LjEyNCAxNDMxLjQyIDUxOC40MzMgMTQ0NS44NiA0ODcuMjIxIDE0NTYuOTFaIiBmaWxsPSIjNDEyQzIzIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTMzMC40MDcgMTEyNy42MkMzNjguMTgzIDExMTQuODUgNDIzLjg4OSAxMTYyLjQxIDQ3NS42NjUgMTE2Mi4yOUM1MjAuODU5IDExNjIuMTkgNTg5Ljc3OSAxMTEzLjY3IDYyNC41OTggMTEyNy42MkM2NTkuNDE3IDExNDEuNTUgNzEwLjMwNCAxMTU0LjggNzU1LjQ0NyAxMTY4LjM5QzczOS4wMiAxMTk1Ljk4IDcyMi42MTEgMTIyMy41NyA3MDYuMjAxIDEyNTEuMTZDNjU2LjYzMSAxMjIzIDU2MS44NjYgMTMxOS4zNyA0NzUuNjY1IDEzMTguODFDMzg0LjgzMSAxMzE4LjIxIDI5NC41OTYgMTIyMyAyNDUuMDQzIDEyNTEuMTZDMjQ3LjU1NiAxMjI0LjAzIDI1MC4wODUgMTE5Ni45MiAyNTIuNjE1IDExNjkuNzlDMjc4LjU0NiAxMTU1Ljc0IDMwNC40NzYgMTE0MS42NyAzMzAuNDA3IDExMjcuNjJaIiBmaWxsPSIjNDEyQzIzIi8+DQo8cGF0aCBkPSJNMzYwLjE2NyAxMTgxLjg0QzM1My45NDUgMTE3NS45MSAzNTMuNzA2IDExNjYuMDUgMzU5LjYyIDExNTkuODFDMzY1LjU1MiAxMTUzLjU5IDM3NS40MTQgMTE1My4zMyAzODEuNjUzIDExNTkuMjZDNDEwLjE5OSAxMTg2LjMyIDQ0My4zMDkgMTE5OS4xNiA0NzYuMDk0IDExOTkuMDJDNTEwLjA1OCAxMTk4Ljg3IDU0NC4wMzkgMTE4NC44IDU3Mi42MzYgMTE1OC4xOUM1NzguOTQzIDExNTIuMzIgNTg4LjgwNiAxMTUyLjY4IDU5NC42NjkgMTE1OC45N0M2MDAuNTMyIDExNjUuMjggNjAwLjE3MyAxMTc1LjE0IDU5My44ODMgMTE4MS4wMUM1NTkuNDc0IDEyMTMuMDIgNTE4LjA0IDEyMjkuOTQgNDc2LjIxMyAxMjMwLjEzQzQzNS41ODMgMTIzMC4zMiAzOTQuODY2IDEyMTQuNzEgMzYwLjE2NyAxMTgxLjg0WiIgZmlsbD0iI0EzNEUxQyIvPg0KPHBhdGggZD0iTTMzMy45NDYgMTIxNS40QzMyOC4yNTQgMTIwOC45NyAzMjguODUyIDExOTkuMTIgMzM1LjI5NyAxMTkzLjQzQzM0MS43MjQgMTE4Ny43NCAzNTEuNTY5IDExODguMzQgMzU3LjI2MSAxMTk0Ljc4QzM2Mi45MTkgMTIwMS4xOSAzNjguODg1IDEyMDcuMTkgMzc1LjEwNyAxMjEyLjhDNDA3LjA1NCAxMjQxLjU3IDQ0Mi4zMzQgMTI1NS4xMSA0NzcuMTcgMTI1NC41OUM1MTIuMTI2IDEyNTQuMDYgNTQ3LjE1IDEyMzkuNCA1NzguNDE0IDEyMTEuNzRDNTg0LjYxOCAxMjA2LjI1IDU5MC44MDYgMTIwMC4wOCA1OTYuOTc3IDExOTMuMjRDNjAyLjczNyAxMTg2Ljg1IDYxMi42IDExODYuMzIgNjE4Ljk5MyAxMTkyLjA4QzYyNS40MDMgMTE5Ny44NCA2MjUuOTE2IDEyMDcuNzEgNjIwLjE1NSAxMjE0LjEyQzYxMy40ODkgMTIyMS41MiA2MDYuNDI5IDEyMjguNTEgNTk5LjA0NSAxMjM1LjA0QzU2Mi4wOSAxMjY3LjcyIDUyMC4wNTcgMTI4NS4wNSA0NzcuNTQ2IDEyODUuN0M0MzQuOTE2IDEyODYuMzUgMzkyLjI4NSAxMjcwLjIzIDM1NC4yNTMgMTIzNS45OEMzNDcuNDY3IDEyMjkuODggMzQwLjY4MSAxMjIzLjAyIDMzMy45NDYgMTIxNS40WiIgZmlsbD0iI0EzNEUxQyIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik04MjIuMTk1IDEyMTguNjFDODUzLjQ3NiAxMjIxLjk5IDg4MC45MSAxMjMwLjkgODk2LjIwOSAxMjQxLjQ4Qzg3OS43OTkgMTI0Ny4yNiA4NjkuNzMxIDEyNTcuNDMgOTA2LjE5MSAxMjY3LjAyQzg5Ni4zMjggMTI3OS4zMyA4NjIuNDUgMTI4NS41MyA4MjIuMTk1IDEyODEuMTlDNzc0LjE5NyAxMjc2LjAxIDczNS4yOTMgMTI1Ny44IDczNS4yOTMgMTI0MC41MkM3MzUuMjkzIDEyMjMuMjQgNzc0LjE5NyAxMjEzLjQzIDgyMi4xOTUgMTIxOC42MVoiIGZpbGw9IiMwRTFFMjYiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNOTE5LjUwNiAxMjM1LjQ1TDkxMC44NTcgMTIxMi40OUw4MjkuNDU5IDExOTQuODNMNzU1LjEwNCAxMjEyLjQ5TDczMC4xODIgMTI0MS41M0w3MzUuODc0IDEyNDcuMjFDNzgwLjYwNyAxMjcyLjMzIDg4Mi40MzEgMTI3Ni40NCA5MTkuNTA2IDEyMzUuNDVaIiBmaWxsPSIjMTEyNTJGIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTc3My43MzYgMTIyOS4zNkM3NzUuNzAyIDEyMDguOTUgODI3Ljg4OCAxMjAwLjM0IDg0NC4zNjYgMTIxNS4wNEM4NjAuODQzIDEyMjkuNzYgODU5LjY2NCAxMjE4LjM3IDg1OS42NjQgMTIxOC4zN0M4NTkuNjY0IDEyMTguMzcgODUyLjk5OCAxMjA3Ljk4IDg2OC41MDEgMTIxMi44OEM4ODMuOTg4IDEyMTcuNzkgODkxLjY2MyAxMjI3LjE5IDg3Ni41NTIgMTIzNC4yNUM4NjEuNDQyIDEyNDEuMzEgNzgzLjk0MSAxMjQ0Ljg3IDc3My43MzYgMTIyOS4zNloiIGZpbGw9IiNFQkVDRUMiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNzM2LjQzOSAxMjU2LjAzTDcwNi4yMDEgMTI1MS4xNkM3MDYuMjAxIDEyNTEuMTYgNzA4LjM1NSAxMjA5LjU1IDcyNC4yNjkgMTE5OS41N0M3NDAuMTgzIDExODkuNTkgODI2LjI4MSAxMTY4LjA3IDg0Ni4yNDYgMTE3MC41NkM4NjYuMjExIDExNzMuMDYgOTAzLjMyIDExODIuNzEgOTA3LjA2NCAxMTg4LjY1QzkxMC44MDcgMTE5NC41OCA5MTguMDM4IDEyMDkuNzcgOTE4LjAzOCAxMjA5Ljc3TDkyMC4xNzQgMTIzNS40NUM4ODQuMTc2IDExODQuMTggNzQ0LjU5MyAxMjAwLjY1IDczNi40MzkgMTI1Ni4wM1oiIGZpbGw9IiM1MDYwNkQiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNOTE4LjAzNyAxMjA5Ljc3QzkwNC4yMDggMTEzNy45NSA4MzEuNTYyIDEwOTIuMzggNzYxLjUzMSAxMDkxLjgzQzcwMC4wODEgMTA5MS4zNSA2MjguNTQ2IDExMzAuMTkgNjI2Ljg1NCAxMTc0Ljg1QzYzNy4xOTUgMTIxNC4xMiA2NzAuMzU2IDEyMzkuMzMgNzA2LjIgMTI1MS4xNkM3NTQuODMxIDExODMuNTUgODUyLjMxMyAxMTcxLjE5IDkxOC4wMzcgMTIwOS43N1oiIGZpbGw9IiNEOURBREEiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjAxLjc0NCA4MTkuNTE4QzYwMS43NDQgODE5LjUxOCA2MjEuNTM4IDc4MS41ODggNjY2LjE4NiA3ODEuNTg4QzcxMC44MzMgNzgxLjU4OCA3NTMuNTMyIDc5NS4yMTEgNzYyLjMzNSA4OTcuNzE5Qzc3MS4xMzggMTAwMC4yMyA3OTEuNjE2IDEwOTcuOSA4MzYuMjYzIDExNDAuNjdDODgwLjkxMSAxMTgzLjQzIDY4MC4zNzMgMTE5My4wNiA2NzIuOTAzIDExOTguMzRDNjY0LjY5OSAxMjA0LjEzIDYxNC4yNTYgMTIxNy4xMiA2MjIuMzI0IDExMTAuNjdDNjI4LjA1MSAxMDM1LjIgNjQ5LjQ2OCAxMDI1LjA1IDY1NC41NjIgOTg2LjY1NUM2NjAuMTE4IDk0NC44MjggNjM3LjM2NiA4NTEuNDE0IDYwMS43NDQgODE5LjUxOFoiIGZpbGw9InVybCgjcGFpbnQ2X2xpbmVhcl82NTI0XzQ0MTUpIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTgwMi41NTUgMTA4OS4zM0M4MDYuNzQyIDEwOTguNzkgODExLjI3MiAxMTA3LjUyIDgxNi4yMTIgMTExNS40NEw3NDguODEzIDExNDUuMTRMNjQ1LjM0OCAxMTk4Ljk5QzY0MC45MDQgMTE5Ni42OCA2MzYuNTI4IDExOTIuODkgNjMyLjc2OCAxMTg2Ljk1QzYyOS4xMjcgMTE3MC43OCA2MjguMzA2IDExMzQuNjcgNjUwLjg2OSAxMDU3LjgzQzY2MS42ODkgMTAyMS4wMyA2NjcuMzMgOTg5LjU0NCA2NjguMDgyIDk2MS4yMjFDNjczLjQxNSA5NjEuMTE4IDY3OC4wODIgOTY0LjcyNSA2ODIuODM0IDk2OC4zNDlDNzAxLjIwOSA5ODIuMzE0IDgwMS4zOTIgMTA4OC44IDgwMi41NTUgMTA4OS4zM1oiIGZpbGw9IiMzNzRCNTYiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjExLjIxMyA4MDYuNTYyQzYxOS4yMyA3OTcuNjU2IDYzMi41MjggNzg2LjgwMiA2NTEuNjczIDc4Mi45OUg2NTEuNjlDNjc3Ljc1NyA3ODUuNzk0IDcyNS45MDggODMyLjM3MyA3NDMuNDk3IDg3My4zNDVDNzYxLjEwMyA5MTQuMzE4IDc2MC4zIDg5My4zMjcgNzYyLjgzIDkwMy4zNzhDNzY0LjIxNCA5MTguNjc2IDc2NS44NTUgOTMzLjg1NSA3NjcuODIxIDk0OC43MjZDNzUwLjgxMyA5NjMuNyA3MzAuMDExIDk3MC42MDYgNzE2LjA4IDk1MC4zNUM3MDQuOTM1IDkzNC4xNDYgNjg0LjQ5MiA5MTQuMjY2IDY2MS45NDYgOTAzLjI1OEM2NjEuOTQ2IDkwMy4yNTggNjQ1LjgxIDg1MS42MzcgNjExLjIxMyA4MDYuNTYyWiIgZmlsbD0iI0E0QUNBRSIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik04MjIuMTk0IDEyMTguNjFDODU4LjE1OCAxMjIyLjQ5IDg4OS4wMjkgMTIzMy43IDkwMi4yNDIgMTI0Ni4zNEM5MDYuNjUyIDEyNTAuNTYgODg0LjkyNiAxMjUzLjYzIDg4OC44NDEgMTI1NS40OEM4OTEuNDU2IDEyNTYuNjkgOTAyLjk5NCAxMjYzLjkxIDkwNi4xNzMgMTI2Ny4wNEM4OTYuMjc2IDEyNzkuMzQgODYyLjQzMiAxMjg1LjUzIDgyMi4xOTQgMTI4MS4xOUM3ODUuNjY2IDEyNzcuMjQgNzU0LjM1MSAxMjY4LjMyIDczNi40MzcgMTI1Ni4wM0M3MzEuNzIgMTI1Mi44IDczNS4yOTIgMTI0NC42NiA3MzUuMjkyIDEyNDAuNTJDNzM1LjI5MiAxMjIzLjI0IDc3NC4xOTYgMTIxMy40MyA4MjIuMTk0IDEyMTguNjFaIiBmaWxsPSIjNDEyQzIzIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTkyMC4xNzMgMTIzNS40NUw5MTAuODU3IDEyMTIuNDlMODI5LjQ1OSAxMTk0LjgzTDc1NS4xMDQgMTIxMi40OUw3MzAuMTgyIDEyNDEuNTNMNzM1Ljg3NCAxMjQ3LjIxQzc4MC42MDcgMTI3Mi4zMyA4ODMuMDk4IDEyNzYuNDQgOTIwLjE3MyAxMjM1LjQ1WiIgZmlsbD0iIzExMjUyRiIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03MzYuNDM5IDEyNTYuMDNMNzA2LjIwMSAxMjUxLjE2QzcwNi4yMDEgMTI1MS4xNiA3MDguMzU1IDEyMDkuNTUgNzI0LjI2OSAxMTk5LjU3Qzc0MC4xODMgMTE4OS41OSA4MjYuMjgxIDExNjguMDcgODQ2LjI0NiAxMTcwLjU2Qzg2Ni4yMTEgMTE3My4wNiA5MDMuMzIgMTE4Mi43MSA5MDcuMDY0IDExODguNjVDOTEwLjgwNyAxMTk0LjU4IDkxOC4wMzggMTIwOS43NyA5MTguMDM4IDEyMDkuNzdMOTIwLjE3NCAxMjM1LjQ1Qzg4NC4xNzYgMTE4NC4xOCA3NDQuNTkzIDEyMDAuNjUgNzM2LjQzOSAxMjU2LjAzWiIgZmlsbD0iIzUwNjA2RCIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03NzUuOTQgMTIzMy43N0M3NzEuMzk0IDEyMTIuMDUgODAwLjExIDEyMDMuMjYgODIyLjY5IDExOTkuNjlDODM2LjY3MyAxMTk3LjQ4IDg1Mi4yMjggMTIwMi43IDg1MS42NjMgMTIxMi43NUM4NTAuMzk5IDEyMzUgODY0LjMzIDEyMjMuNiA4NjUuNzE0IDEyMTkuNDhDODY3LjAxMyAxMjE1LjYyIDg1Ny44IDEyMTEuMDIgODU4LjcyMyAxMjA4LjYxQzg2MC4yMSAxMjA0LjcgODY2LjEyNCAxMjAzLjcxIDg3Mi4wMjIgMTIwNi4xOUM4ODEuNTQyIDEyMTAuMTkgODg1LjA0NyAxMjMzLjIzIDg2OS45MzYgMTI0MC4yOUM4NTQuODQzIDEyNDcuMzUgNzc5LjIzOSAxMjQ5LjU3IDc3NS45NCAxMjMzLjc3WiIgZmlsbD0iI0ZFQ0MwMCIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik02NjEuOTQ3IDkwMy4yNThDNjg0LjQ5MyA5MTQuMjY2IDcwNC45MzcgOTM0LjE0NSA3MTYuMDgyIDk1MC4zNUM3MzAuMDEzIDk3MC42MDUgNzUwLjgxNSA5NjMuNjk5IDc2Ny44MjMgOTQ4LjcyNkM3NzQuODE0IDEwMDEuOTUgNzg1Ljc1NCAxMDUxLjM3IDgwMi41NTYgMTA4OS4zM0M3NzkuNTE1IDEwNzguOTggNzQ4Ljg2NiAxMDY3LjkgNzI1LjgyNSAxMDY5LjQyQzY4My42NzMgMTA3Mi4yMSA2NjQuNTk3IDEwODIuNTUgNjY0LjU5NyAxMDgyLjU1QzY2NC41OTcgMTA4Mi41NSA2ODMuNjA0IDEwMTUuMzcgNjc1LjcyNCA5NzguNzc2QzY3NC40NiA5NzIuOTMgNjcxLjc0MiA5NjcuMDMzIDY2OC4wODQgOTYxLjIyMUM2NjguNjMxIDk0MC40NyA2NjYuNTYyIDkyMS40MTEgNjYxLjk0NyA5MDMuMjU4WiIgZmlsbD0iIzU4NjY2RiIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik01ODcuMzY5IDE0NzEuODVDNTc0LjAwMiAxNDYzLjUxIDU0OS4yODYgMTQ1MC4zOSA1NDYuNjg3IDE0MjIuNTJDNTMxLjM1NSAxNDM1LjYzIDUwOS4xNjggMTQ0OS4yNyA0ODcuODg3IDE0NTYuNjhDNTE0LjQ4NCAxNDU2LjE3IDU1Mi40NDggMTQ2My4wNiA1ODcuMzY5IDE0NzEuODVaIiBmaWxsPSIjRkVDQzAwIi8+DQo8cGF0aCBkPSJNNDkzLjQ3NyAzMjEuMTY0SDQ2MC43OTVDNDU2Ljk5IDMyMS4xNjQgNDUzLjkwNiAzMjQuMjQ0IDQ1My45MDYgMzI4LjA0NEM0NTMuOTA2IDMzMS44NDQgNDU2Ljk5IDMzNC45MjQgNDYwLjc5NSAzMzQuOTI0SDQ5My40NzdDNDk3LjI4MiAzMzQuOTI0IDUwMC4zNjYgMzMxLjg0NCA1MDAuMzY2IDMyOC4wNDRDNTAwLjM2NiAzMjQuMjQ0IDQ5Ny4yODIgMzIxLjE2NCA0OTMuNDc3IDMyMS4xNjRaIiBmaWxsPSIjRkVDQzAwIi8+DQo8cGF0aCBkPSJNNDkzLjQ3NyAzNDAuNzdINDYwLjc5NUM0NTYuOTkgMzQwLjc3IDQ1My45MDYgMzQzLjg1IDQ1My45MDYgMzQ3LjY1QzQ1My45MDYgMzUxLjQ0OSA0NTYuOTkgMzU0LjUzIDQ2MC43OTUgMzU0LjUzSDQ5My40NzdDNDk3LjI4MiAzNTQuNTMgNTAwLjM2NiAzNTEuNDQ5IDUwMC4zNjYgMzQ3LjY1QzUwMC4zNjYgMzQzLjg1IDQ5Ny4yODIgMzQwLjc3IDQ5My40NzcgMzQwLjc3WiIgZmlsbD0iI0ZFQ0MwMCIvPg0KPHBhdGggZD0iTTQ5My40NzcgMzYwLjM1OUg0NjAuNzk1QzQ1Ni45OSAzNjAuMzU5IDQ1My45MDYgMzYzLjQ0IDQ1My45MDYgMzY3LjIzOUM0NTMuOTA2IDM3MS4wMzkgNDU2Ljk5IDM3NC4xMTkgNDYwLjc5NSAzNzQuMTE5SDQ5My40NzdDNDk3LjI4MiAzNzQuMTE5IDUwMC4zNjYgMzcxLjAzOSA1MDAuMzY2IDM2Ny4yMzlDNTAwLjM2NiAzNjMuNDQgNDk3LjI4MiAzNjAuMzU5IDQ5My40NzcgMzYwLjM1OVoiIGZpbGw9IiNGRUNDMDAiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjQ4LjYzMiAxMTAuNzQ2TDY1MS40NTMgMTEyLjg2Nkw2MzAuNzM2IDE1My40NDVINjI4LjcxOUw2NDguNjMyIDExMC43NDZaIiBmaWxsPSIjNUI1QjVCIi8+DQo8cGF0aCBkPSJNNjMwLjcxOSAyNi4zOTI2SDYyOC43MTlWMTUzLjQ0N0g2MzAuNzE5VjI2LjM5MjZaIiBmaWxsPSIjRkVGRUZFIi8+DQo8cGF0aCBkPSJNNjI5LjcyNyA0OC4wMzJDNjQyLjk5MSA0OC4wMzIgNjUzLjc0MyAzNy4yNzk3IDY1My43NDMgMjQuMDE2QzY1My43NDMgMTAuNzUyMyA2NDIuOTkxIDAgNjI5LjcyNyAwQzYxNi40NjMgMCA2MDUuNzExIDEwLjc1MjMgNjA1LjcxMSAyNC4wMTZDNjA1LjcxMSAzNy4yNzk3IDYxNi40NjMgNDguMDMyIDYyOS43MjcgNDguMDMyWiIgZmlsbD0idXJsKCNwYWludDdfcmFkaWFsXzY1MjRfNDQxNSkiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTMwLjA0MSAxMjE4LjYxQzk4Ljc2MDQgMTIyMS45OSA3MS4zMjU4IDEyMzAuOSA1Ni4wMjc0IDEyNDEuNDhDNzIuNDM2OSAxMjQ3LjI2IDgyLjUwNDggMTI1Ny40MyA0Ni4wNDQ5IDEyNjcuMDJDNTUuOTA3NyAxMjc5LjMzIDg5Ljc4NjUgMTI4NS41MyAxMzAuMDQxIDEyODEuMTlDMTc4LjAzOSAxMjc2LjAxIDIxNi45NDMgMTI1Ny44IDIxNi45NDMgMTI0MC41MkMyMTYuOTQzIDEyMjMuMjQgMTc4LjAzOSAxMjEzLjQzIDEzMC4wNDEgMTIxOC42MVoiIGZpbGw9IiMwRTFFMjYiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMzIuNzI4NSAxMjM1LjQ1TDQxLjM2MDYgMTIxMi40OUwxMjIuNzc2IDExOTQuODNMMTk3LjEzMSAxMjEyLjQ5TDIyMi4wNTMgMTI0MS41M0wyMTYuMzYxIDEyNDcuMjFDMTcxLjYyOCAxMjcyLjMzIDY5LjgwMzcgMTI3Ni40NCAzMi43Mjg1IDEyMzUuNDVaIiBmaWxsPSIjMTEyNTJGIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE3OC41MDEgMTIyOS4zNkMxNzYuNTM1IDEyMDguOTUgMTI0LjM0OSAxMjAwLjM0IDEwNy44NzEgMTIxNS4wNEM5MS4zOTM1IDEyMjkuNzYgOTIuNTcyOSAxMjE4LjM3IDkyLjU3MjkgMTIxOC4zN0M5Mi41NzI5IDEyMTguMzcgOTkuMjM5MyAxMjA3Ljk4IDgzLjczNTcgMTIxMi44OEM2OC4yNDkzIDEyMTcuNzkgNjAuNTc0NCAxMjI3LjE5IDc1LjY4NDggMTIzNC4yNUM5MC43OTUyIDEyNDEuMzEgMTY4LjI5NiAxMjQ0Ljg3IDE3OC41MDEgMTIyOS4zNloiIGZpbGw9IiNFQkVDRUMiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMjE1Ljc5OCAxMjU2LjAzTDI0Ni4wMzYgMTI1MS4xNkMyNDYuMDM2IDEyNTEuMTYgMjQzLjg4MiAxMjA5LjU1IDIyNy45NjggMTE5OS41N0MyMTIuMDU0IDExODkuNTkgMTI1Ljk1NiAxMTY4LjA3IDEwNS45OTEgMTE3MC41NkM4Ni4wMjU4IDExNzMuMDYgNDguOTE2NCAxMTgyLjcxIDQ1LjE3MyAxMTg4LjY1QzQxLjQxMjUgMTE5NC41OCAzNC4xOTkyIDEyMDkuNzcgMzQuMTk5MiAxMjA5Ljc3TDMyLjA2MjUgMTIzNS40NUM2OC4wNjA4IDExODQuMTggMjA3LjY0NCAxMjAwLjY1IDIxNS43OTggMTI1Ni4wM1oiIGZpbGw9IiM1MDYwNkQiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMzQuMTk5MiAxMjA5Ljc3QzQ4LjAyNzYgMTEzNy45NSAxMjAuNjc0IDEwOTIuMzggMTkwLjcwNSAxMDkxLjgzQzI1Mi4xNTUgMTA5MS4zNSAzMjMuNjkgMTEzMC4xOSAzMjUuMzgyIDExNzQuODVDMzE1LjA0MSAxMjE0LjEyIDI4MS44OCAxMjM5LjMzIDI0Ni4wMzYgMTI1MS4xNkMxOTcuMzg4IDExODMuNTUgOTkuOTIyNyAxMTcxLjE5IDM0LjE5OTIgMTIwOS43N1oiIGZpbGw9IiNEOURBREEiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTQ5LjY4MSAxMDg5LjMzQzE0NS40OTMgMTA5OC43OSAxNDAuOTQ2IDExMDcuNTIgMTM2LjAyMyAxMTE1LjQ0TDIwMy40MjIgMTE0NS4xNEwzMDYuODcgMTE5OC45OUMzMTEuMzMyIDExOTYuNjggMzE1LjcwNyAxMTkyLjg5IDMxOS40NTEgMTE4Ni45NUMzMjMuMTA5IDExNzAuNzggMzIzLjkyOSAxMTM0LjY3IDMwMS4zNDkgMTA1Ny44M0MyOTAuNTQ2IDEwMjEuMDMgMjg0LjkwNSA5ODkuNTQ0IDI4NC4xNTMgOTYxLjIyMUMyNzguODIgOTYxLjExOCAyNzQuMTU0IDk2NC43MjUgMjY5LjQwMiA5NjguMzQ5QzI1MS4wMjcgOTgyLjMxNCAxNTAuODQzIDEwODguOCAxNDkuNjgxIDEwODkuMzNaIiBmaWxsPSIjMzc0QjU2Ii8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTM0MS4wMjIgODA2LjU2QzMzMy4wMDYgNzk3LjY1NCAzMTkuNzA3IDc4Ni44IDMwMC41NDUgNzgyLjk4OEMyNzQuNDc4IDc4NS43OTIgMjI2LjMyNyA4MzIuMzcxIDIwOC43MzggODczLjM0M0MxOTEuMTMyIDkxNC4zMTYgMTkxLjkzNSA4OTMuMzI1IDE4OS40MDUgOTAzLjM3NkMxODguMDIxIDkxOC42NzQgMTg2LjM2MyA5MzMuODUzIDE4NC40MTQgOTQ4LjcyNEMyMDEuNDIyIDk2My42OTggMjIyLjIyNCA5NzAuNjA0IDIzNi4xNTUgOTUwLjM0OEMyNDcuMyA5MzQuMTQ0IDI2Ny43MjYgOTE0LjI2NCAyOTAuMjkgOTAzLjI1NkMyOTAuMjkgOTAzLjI1NiAzMDYuNDI2IDg1MS42MzUgMzQxLjAyMiA4MDYuNTZaIiBmaWxsPSIjQTRBQ0FFIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEzMC4wNDEgMTIxOC42MUM5NC4wNzY0IDEyMjIuNDkgNjUuNTEzNiAxMjMxLjY1IDUyLjMwMDUgMTI0NC4yOEM0Ny44OTA1IDEyNDguNTEgNjYuMDc3NyAxMjUzLjE2IDYyLjE0NjIgMTI1NC45OEM1OS41MzEgMTI1Ni4yIDQ2Ljk1MDMgMTI2Mi42MyA0My43NTM5IDEyNjUuNzVDNTMuNjUwOSAxMjc4LjA0IDg5LjgwMzEgMTI4NS41MyAxMzAuMDQxIDEyODEuMTlDMTY2LjU1MiAxMjc3LjI0IDE5Ny44NjYgMTI2OC4zMiAyMTUuNzk3IDEyNTYuMDNDMjIwLjUxNSAxMjUyLjggMjE2Ljk0MyAxMjQ0LjY2IDIxNi45NDMgMTI0MC41MkMyMTYuOTQzIDEyMjMuMjQgMTc4LjAzOCAxMjEzLjQzIDEzMC4wNDEgMTIxOC42MVoiIGZpbGw9IiM0MTJDMjMiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMzIuMDYyNSAxMjM1LjQ1TDQxLjM2MTIgMTIxMi40OUwxMjIuNzc2IDExOTQuODNMMTk3LjEzMiAxMjEyLjQ5TDIyMi4wNTQgMTI0MS41M0wyMTYuMzYyIDEyNDcuMjFDMTcxLjYyOSAxMjcyLjMzIDY5LjEzNzcgMTI3Ni40NCAzMi4wNjI1IDEyMzUuNDVaIiBmaWxsPSIjMTEyNTJGIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTIxNS43OTggMTI1Ni4wM0wyNDYuMDM2IDEyNTEuMTZDMjQ2LjAzNiAxMjUxLjE2IDI0My44ODIgMTIwOS41NSAyMjcuOTY4IDExOTkuNTdDMjEyLjA1NCAxMTg5LjU5IDEyNS45NTYgMTE2OC4wNyAxMDUuOTkxIDExNzAuNTZDODYuMDI1OCAxMTczLjA2IDQ4LjkxNjQgMTE4Mi43MSA0NS4xNzMgMTE4OC42NUM0MS40MTI1IDExOTQuNTggMzQuMTk5MiAxMjA5Ljc3IDM0LjE5OTIgMTIwOS43N0wzMi4wNjI1IDEyMzUuNDVDNjguMDYwOCAxMTg0LjE4IDIwNy42NDQgMTIwMC42NSAyMTUuNzk4IDEyNTYuMDNaIiBmaWxsPSIjNTA2MDZEIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTM0LjE5OTIgMTIwOS43N0M0OC4wMjc2IDExMzcuOTUgMTIwLjY3NCAxMDkyLjM4IDE5MC43MDUgMTA5MS44M0MyNTIuMTU1IDEwOTEuMzUgMzIzLjY5IDExMzAuMTkgMzI1LjM4MiAxMTc0Ljg1QzMxNS4wNDEgMTIxNC4xMiAyODEuODggMTIzOS4zMyAyNDYuMDM2IDEyNTEuMTZDMTk3LjM4OCAxMTgzLjU1IDk5LjkyMjcgMTE3MS4xOSAzNC4xOTkyIDEyMDkuNzdaIiBmaWxsPSJ1cmwoI3BhaW50OF9saW5lYXJfNjUyNF80NDE1KSIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzYuMjk1IDEyMzMuNzdDMTgwLjg0MiAxMjEyLjA1IDE1Mi4xMjUgMTIwMy4yNiAxMjkuNTQ1IDExOTkuNjlDMTE1LjU0NSAxMTk3LjQ4IDEwMC4wMDggMTIwMi43IDEwMC41NzIgMTIxMi43NUMxMDEuODIgMTIzNSA4Ny44ODg2IDEyMjMuNiA4Ni41MDQxIDEyMTkuNDhDODUuMjA1IDEyMTUuNjIgOTQuNDM1NCAxMjExLjAyIDkzLjUxMjMgMTIwOC42MUM5Mi4wMjUyIDEyMDQuNyA4Ni4xMTA5IDEyMDMuNzEgODAuMjEzOCAxMjA2LjE5QzcwLjY5MjkgMTIxMC4xOSA2Ny4xODg3IDEyMzMuMjMgODIuMjgyMSAxMjQwLjI5Qzk3LjM5MjUgMTI0Ny4zNSAxNzIuOTc5IDEyNDkuNTcgMTc2LjI5NSAxMjMzLjc3WiIgZmlsbD0iI0ZFQ0MwMCIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0yOTAuMjkxIDkwMy4yNThDMjY3LjcyNyA5MTQuMjY2IDI0Ny4zMDEgOTM0LjE0NSAyMzYuMTU2IDk1MC4zNUMyMjIuMjI1IDk3MC42MDUgMjAxLjQyMyA5NjMuNjk5IDE4NC40MTUgOTQ4LjcyNkMxNzcuNDI0IDEwMDEuOTUgMTY2LjQ2NyAxMDUxLjM3IDE0OS42ODIgMTA4OS4zM0MxNzIuNzIzIDEwNzguOTggMjAzLjM3MSAxMDY3LjkgMjI2LjQxMyAxMDY5LjQyQzI2OC41NjUgMTA3Mi4yMSAyODcuNjQxIDEwODIuNTUgMjg3LjY0MSAxMDgyLjU1QzI4Ny42NDEgMTA4Mi41NSAyNjguNjE2IDEwMTUuMzcgMjc2LjUxMyA5NzguNzc2QzI3Ny43NzggOTcyLjkzIDI4MC40NzkgOTY3LjAzMyAyODQuMTU0IDk2MS4yMjFDMjgzLjYwNyA5NDAuNDcgMjg1LjY3NSA5MjEuNDExIDI5MC4yOTEgOTAzLjI1OFoiIGZpbGw9IiM1ODY2NkYiLz4NCjxwYXRoIGQ9Ik0yNjguNDI4IDg0MS45NjFDMjc2LjcxNiA4NDEuOTYxIDI4My40MzYgODM1LjI0MiAyODMuNDM2IDgyNi45NTNDMjgzLjQzNiA4MTguNjY1IDI3Ni43MTYgODExLjk0NSAyNjguNDI4IDgxMS45NDVDMjYwLjEzOSA4MTEuOTQ1IDI1My40MiA4MTguNjY1IDI1My40MiA4MjYuOTUzQzI1My40MiA4MzUuMjQyIDI2MC4xMzkgODQxLjk2MSAyNjguNDI4IDg0MS45NjFaIiBmaWxsPSIjRUJFQ0VDIi8+DQo8cGF0aCBkPSJNMzA4LjIyMSAxNjMuNTEzQzMxOC43MTggMTYzLjUxMyAzMjcuMjI4IDE1NS4wMDMgMzI3LjIyOCAxNDQuNTA2QzMyNy4yMjggMTM0LjAwOCAzMTguNzE4IDEyNS40OTggMzA4LjIyMSAxMjUuNDk4QzI5Ny43MjMgMTI1LjQ5OCAyODkuMjEzIDEzNC4wMDggMjg5LjIxMyAxNDQuNTA2QzI4OS4yMTMgMTU1LjAwMyAyOTcuNzIzIDE2My41MTMgMzA4LjIyMSAxNjMuNTEzWiIgZmlsbD0iI0ZFRkVGRSIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik03MDAuOTU1IDgxMy41ODZDNzExLjQ1IDgxMy41ODYgNzE5Ljk2MyA4MjIuMDk4IDcxOS45NjMgODMyLjU5NEM3MTkuOTYzIDg0My4wODkgNzExLjQ1IDg1MS42MDEgNzAwLjk1NSA4NTEuNjAxQzY5MC40NiA4NTEuNjAxIDY4MS45NDcgODQzLjA4OSA2ODEuOTQ3IDgzMi41OTRDNjgxLjk0NyA4MjIuMDk4IDY5MC40NiA4MTMuNTg2IDcwMC45NTUgODEzLjU4NloiIGZpbGw9IiNGRUZFRkUiIGZpbGwtb3BhY2l0eT0iMC41MDE5NjEiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNDc1LjMwNyA3MzkuNjA3QzUxNi43NzUgNzM5LjYwNyA1NTMuNzY1IDc1My45NDkgNTgzLjQyMiA3NzguMzA2QzU2My4wMjkgODA1LjUzNiA1MjIuNDMzIDgyNC4wOTkgNDc1LjY4MyA4MjQuMDk5QzQyOC42OTQgODI0LjA5OSAzODcuOTQzIDgwNS4zNjUgMzY3LjYzNyA3NzcuOTNDMzk3LjIwOCA3NTMuNzk1IDQzNC4wNDQgNzM5LjYwNyA0NzUuMzA3IDczOS42MDdaIiBmaWxsPSIjQTRBQ0FFIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTUzNy4wMTIgNzQ3LjMxNkM1NDIuODU4IDc1MS44NjMgNTQ4LjQ0NyA3NTUuNzYgNTU1LjYwOSA3NTkuNjI0QzU0My4zMDIgNzc3LjA3NiA1MTIuMTU4IDc4OS40NjggNDc1LjY4MSA3ODkuNDY4QzQzOC45ODIgNzg5LjQ2OCA0MDcuNzAyIDc3Ni45MjIgMzk1LjUzMSA3NTkuMzMzQzQwMi42OTMgNzU1LjUyMSA0MTEuMzk0IDc1MC4wNTEgNDE0LjUyMiA3NDcuNDM2QzQyOS4yNzMgNzU1Ljk0OCA0NTMuMTE4IDc2My4yNDcgNDc1LjY4MSA3NjMuMjQ3QzQ5OC4yNDQgNzYzLjI0NyA1MjIuMjc4IDc1NS43NDMgNTM3LjAxMiA3NDcuMzE2WiIgZmlsbD0iIzU4NjY2RiIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik01MzcuMDE0IDc0Ny4zMTdDNTIyLjA5MSA3NTcuMDc3IDUwMC4xNDMgNzYzLjI0OCA0NzUuNjgzIDc2My4yNDhDNDUxLjMwOCA3NjMuMjQ4IDQyOS40MjkgNzU3LjEyOCA0MTQuNTIzIDc0Ny40MzZDNDQzLjQ3OSA3MjYuNzUzIDQ0Mi45MTUgNzExLjAyOCA0MjcuNjY4IDY5OS45TDUxOS40MDggNjk5LjQwNEM1MDEuNTYyIDcxOS4wNDQgNTE1LjEzNCA3MzIuNTY1IDUzNy4wMTQgNzQ3LjMxN1oiIGZpbGw9IiM0MTJDMjMiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNTM3LjAxMyA3NDcuMzE2TDU0Ni41ODUgNzUxLjQ3QzU0Ny4wOCA3NTEuNjkyIDU0Ni4zNDUgNzUyLjEwMyA1NDYuODQxIDc1Mi4zNDJMNTU1LjM3MSA3NTYuNDQ0QzU1NS44NjYgNzU2LjY4MyA1NTQuOTQzIDc1Ny4zNjcgNTU1LjQyMiA3NTcuNjU4QzU3MS4wNzkgNzY3LjI5OCA1ODUuNjQzIDc3OC45MjIgNTk4LjU2NSA3OTIuNjQ4QzU3NS4zMzYgOTY1Ljc1MSA2NjUuODI3IDExNTcuNjcgNDc1LjMwNiAxMTcxLjAyQzM5My43NzEgMTE3Ni43NSAzMjIuMzM5IDExMDcuMjcgMjk5LjQgMTAyNi44OEMyOTUuOTQ3IDEwMTQuNzcgMjk5LjE3NyAxMDA0LjM1IDI5Ny41MzYgOTkxLjI3MUMyOTEuMjYzIDk4NS4zMDUgMjg5LjI5NyA5NzYuNjczIDI4OS4xMDkgOTcwLjcyNUMyODkuMDc1IDk2OS41NDUgMjk5LjkxMiA5NjguNDM0IDMwMC41NDUgOTY4LjU4OEMyOTcuNjIyIDk1Ni4yNDcgMjg5Ljk4MSA5NDEuNTY0IDI5My4xMDkgOTE3LjE3MkMzOTUuODc0IDg5Ni40NTUgNDk3LjY4MSA4MzEuNTY5IDUzNy4wMTMgNzQ3LjMxNloiIGZpbGw9IiNFQzY5MUYiLz4NCjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNTQ2LjYxOSA3NTIuMzI0QzQ5My41MSA4NTEuNTUgMzk0Ljg2NSA5MjUuODU1IDI4OC45MDQgOTQ3LjM1OEwyODkuMTA5IDk3MC43MjRDMzg3LjI0MiA5NTQuODI4IDUwNC44NzcgODcyLjkzNCA1NDYuNjE5IDc1Mi4zMjRaIiBmaWxsPSIjQTM0RTFDIi8+DQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTU1NS4yODUgNzU3LjMzNEM0OTkuNDU5IDg3OS44NDEgNDAzLjc4OCA5NjYuMDA4IDI5Mi40MjYgOTkyLjUzN0wyOTkuNCAxMDI2Ljg4QzQwMi41MjMgMTAwNy4yNyA1MTEuNDA3IDkwNi4yMzMgNTU1LjI4NSA3NTcuMzM0WiIgZmlsbD0iI0EzNEUxQyIvPg0KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik00NzUuNyA5MjguNjkxQzQ5Ny44MzYgOTI4LjY5MSA1MTUuNzg0IDk0Ni42MzkgNTE1Ljc4NCA5NjguNzkyQzUxNS43ODQgOTkwLjkyOCA0OTcuODM2IDEwMDguODkgNDc1LjcgMTAwOC44OUM0NTMuNTQ4IDEwMDguODkgNDM1LjYgOTkwLjkyOCA0MzUuNiA5NjguNzkyQzQzNS42IDk0Ni42MzkgNDUzLjU0OCA5MjguNjkxIDQ3NS43IDkyOC42OTFaIiBmaWxsPSIjRjhBRjI4IiBmaWxsLW9wYWNpdHk9IjAuMjM5MjE2Ii8+DQo8cGF0aCBkPSJNNDc5Ljk3NCA5NjguNjM3Vjk1OC4wMDVDNDc5Ljk3NCA5NTcuNDI0IDQ3OS43NTIgOTU3LjExNyA0NzkuMzI0IDk1Ny4wODJINDcwLjQ3QzQ2OS45NCA5NTcuMDgyIDQ2OS42NjcgOTU3LjM5IDQ2OS42NjcgOTU4LjAwNVY5NjguNjM3QzQ2OS42NjcgOTY5LjI1MyA0NjkuOTQgOTY5LjU2IDQ3MC40NyA5NjkuNTZINDc5LjE4OEM0NzkuNzE4IDk2OS41NiA0NzkuOTc0IDk2OS4yNTMgNDc5Ljk3NCA5NjguNjM3Wk00NzkuMTg4IDk3Ni4yOTVINDcwLjQ3QzQ2OS45NCA5NzYuMjk1IDQ2OS42NjcgOTc2LjYwMyA0NjkuNjY3IDk3Ny4yMThWOTgwLjkyN0M0NjkuNjY3IDk4MS45MzYgNDY5LjE1NCA5ODIuNDMyIDQ2OC4wOTQgOTgyLjQzMkg0NjMuNTNDNDYyLjQ3IDk4Mi40MzIgNDYxLjk0MSA5ODEuOTM2IDQ2MS45NDEgOTgwLjkyN1Y5NTguMDA1QzQ2MS45NDEgOTU3LjQyNCA0NjEuNzE4IDk1Ny4xMTcgNDYxLjI5MSA5NTcuMDgySDQ1Ny45MjRDNDU2Ljg2NCA5NTcuMDgyIDQ1Ni4zMzQgOTU2LjU1MyA0NTYuMzM0IDk1NS40OTNWOTUxLjY2NEM0NTYuMzM0IDk1MC42OSA0NTYuODY0IDk1MC4yMTEgNDU3LjkyNCA5NTAuMjExSDQ5Mi4wNTlDNDkzLjExOSA5NTAuMjExIDQ5My42NDkgOTUwLjcwNyA0OTMuNjQ5IDk1MS43MzJWOTU1LjQ5M0M0OTMuNjQ5IDk1Ni41NTMgNDkzLjExOSA5NTcuMDgyIDQ5Mi4wNTkgOTU3LjA4Mkg0ODguNTAzQzQ4Ny45NzQgOTU3LjA4MiA0ODcuNyA5NTcuMzkgNDg3LjcgOTU4LjAwNVY5ODkuODMzQzQ4Ny43IDk5MC44NDIgNDg3LjE3IDk5MS4zNTQgNDg2LjEyNyA5OTEuMzU0SDQ4MS41NjRDNDgwLjUwNCA5OTEuMzU0IDQ3OS45NzQgOTkwLjg0MiA0NzkuOTc0IDk4OS44MzNWOTc3LjIxOEM0NzkuOTc0IDk3Ni42MDMgNDc5LjcxOCA5NzYuMjk1IDQ3OS4xODggOTc2LjI5NVoiIGZpbGw9IiNBMzRFMUMiLz4NCjxwYXRoIGQ9Ik00NjQuNjIzIDk2OS40NTlINDU4LjUyMUM0NTguMDU5IDk2OS40NTkgNDU3LjY4NCA5NjkuOTY0IDQ1Ny42ODQgOTcwLjU4N1Y5NzUuNTQ0QzQ1Ny42ODQgOTc2LjE2NyA0NTguMDU5IDk3Ni42NzIgNDU4LjUyMSA5NzYuNjcySDQ2NC42MjNDNDY1LjA4NiA5NzYuNjcyIDQ2NS40NjEgOTc2LjE2NyA0NjUuNDYxIDk3NS41NDRWOTcwLjU4N0M0NjUuNDYxIDk2OS45NjQgNDY1LjA4NiA5NjkuNDU5IDQ2NC42MjMgOTY5LjQ1OVoiIGZpbGw9IiNBMzRFMUMiLz4NCjxkZWZzPg0KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzY1MjRfNDQxNSIgeDE9IjIwNC4zNDUiIHkxPSI1MzMuNzAxIiB4Mj0iMjI5LjM1MiIgeTI9IjQzOC45NyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KPHN0b3Agc3RvcC1jb2xvcj0iIzM3NEI1NiIvPg0KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjODk4OTg5Ii8+DQo8L2xpbmVhckdyYWRpZW50Pg0KPHJhZGlhbEdyYWRpZW50IGlkPSJwYWludDFfcmFkaWFsXzY1MjRfNDQxNSIgY3g9IjAiIGN5PSIwIiByPSIxIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDEyNC4wMTcgNC4wMDAzNSAtMS4zMzMwNiAxMTguMjE3IDQ2NC4zNDkgMTE1Ljc4OSkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCjxzdG9wIHN0b3AtY29sb3I9IiNFQkUzRDYiLz4NCjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0QxRDBDQyIvPg0KPC9yYWRpYWxHcmFkaWVudD4NCjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQyX2xpbmVhcl82NTI0XzQ0MTUiIHgxPSI0NzguNDM1IiB5MT0iNjY2LjU4NSIgeDI9IjQ3NS4wNjciIHkyPSIzOC40MjU3IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+DQo8c3RvcCBzdG9wLWNvbG9yPSIjODI4OTkxIi8+DQo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNDN0M3QzkiLz4NCjwvbGluZWFyR3JhZGllbnQ+DQo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50M19yYWRpYWxfNjUyNF80NDE1IiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoLTIuODQyNDEgMzEyLjEzIC0zODQuNTgzIDIuMTkzNzEgNDc1LjcwNSAzNzUuNjU0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KPHN0b3Agc3RvcC1jb2xvcj0iIzdBNkE0OCIvPg0KPHN0b3Agb2Zmc2V0PSIwLjY1ODgyNCIgc3RvcC1jb2xvcj0iIzQxMkMyMyIvPg0KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNDEyQzIzIi8+DQo8L3JhZGlhbEdyYWRpZW50Pg0KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDRfbGluZWFyXzY1MjRfNDQxNSIgeDE9IjU3MS43OCIgeTE9IjYwLjA2NTUiIHgyPSI1MTAuOTQ1IiB5Mj0iNDAzLjQzNCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KPHN0b3Agc3RvcC1jb2xvcj0id2hpdGUiLz4NCjxzdG9wIG9mZnNldD0iMC4yMTE3NjUiIHN0b3AtY29sb3I9IndoaXRlIiBzdG9wLW9wYWNpdHk9IjAuNTAxOTYxIi8+DQo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IndoaXRlIiBzdG9wLW9wYWNpdHk9IjAiLz4NCjwvbGluZWFyR3JhZGllbnQ+DQo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50NV9saW5lYXJfNjUyNF80NDE1IiB4MT0iNTY3Ljk4NiIgeTE9IjQ2Ljc4NDMiIHgyPSI0ODkuMjM3IiB5Mj0iNjE2Ljk2MyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KPHN0b3Agc3RvcC1jb2xvcj0iI0ZFRkVGRSIvPg0KPHN0b3Agb2Zmc2V0PSIwLjI1MDk4IiBzdG9wLWNvbG9yPSIjRkVGRUZFIi8+DQo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IndoaXRlIi8+DQo8L2xpbmVhckdyYWRpZW50Pg0KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDZfbGluZWFyXzY1MjRfNDQxNSIgeDE9IjYyNi4xNTMiIHkxPSIxMjAzLjE2IiB4Mj0iNjgyLjE4NSIgeTI9IjgyOS44NTkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCjxzdG9wIHN0b3AtY29sb3I9IiM3NTdFODciLz4NCjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0Q5REFEQSIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxyYWRpYWxHcmFkaWVudCBpZD0icGFpbnQ3X3JhZGlhbF82NTI0XzQ0MTUiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgtNC44MjE3NiAyNC45MDg3IC0zNS4zNTU1IC02LjI3NDY3IDYzOC4zODMgMTIuMDIxNSkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4NCjxzdG9wIHN0b3AtY29sb3I9IndoaXRlIi8+DQo8c3RvcCBvZmZzZXQ9IjAuMTYwNzg0IiBzdG9wLWNvbG9yPSIjRDNBODU2Ii8+DQo8c3RvcCBvZmZzZXQ9IjAuNjMxMzczIiBzdG9wLWNvbG9yPSIjNDEyQzIzIi8+DQo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyMTFDMUUiLz4NCjwvcmFkaWFsR3JhZGllbnQ+DQo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50OF9saW5lYXJfNjUyNF80NDE1IiB4MT0iMTc3LjE2NyIgeTE9IjEyMDcuOTYiIHgyPSIxNzcuNDkyIiB5Mj0iMTEwMy4xNiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPg0KPHN0b3Agc3RvcC1jb2xvcj0iIzk3OUZBMyIvPg0KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRTlFNEVCIi8+DQo8L2xpbmVhckdyYWRpZW50Pg0KPC9kZWZzPg0KPC9zdmc+DQo=" alt="MokshPath mascot">
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="hero-badge"><span class="dot"></span> Learn by doing · No code</span>
+    <h1>Prompting is a <em>literacy</em>,<br>not a coding skill</h1>
+    <p class="hero-sub">A good prompt is closer to briefing a designer, asking a junior lawyer a precise question, or directing an actor than it is to programming. There's craft to it — and you learn it by trying. Pick the kind of work <em>you</em> do, and practise on a case study from your own world.</p>
+    <div class="hero-analogy">
+      <span class="analogy-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg> A brief for a designer</span>
+      <span class="analogy-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> A question for an associate</span>
+      <span class="analogy-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Directions for an actor</span>
+    </div>
+    <a href="#pick" style="text-decoration:none"><span class="scroll-hint">Choose your world
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></a>
+  </div>
+</header>
+
+<!-- PERSONA PICKER -->
+<section id="pick">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-kicker"><span class="n">01</span> Make it yours</span>
+      <h2 class="section-title">Pick the work you do</h2>
+      <p class="section-sub">No technical background needed. Choose the world closest to yours and every example below — the task, the prompts, the outputs — switches to a case study you'll recognise. You can change it any time.</p>
+    </div>
+    <div class="persona-grid reveal" id="personaGrid"></div>
+  </div>
+</section>
+
+<!-- CASE + LAB -->
+<section>
+  <div class="container">
+    <div class="usecase reveal" id="caseBanner">
+      <span class="usecase-ico" id="caseIco"></span>
+      <div class="usecase-body">
+        <div class="lbl" id="caseLbl"></div>
+        <h3 id="caseTitle"></h3>
+        <p id="caseDesc"></p>
+      </div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top:2.4rem">
+      <span class="section-kicker"><span class="n">02</span> The four techniques</span>
+      <h2 class="section-title">Same task, four ways of asking</h2>
+      <p class="section-sub">Each tab keeps your case study fixed and changes only <em>how</em> you ask. Press the buttons, read what comes back, and feel the difference for yourself.</p>
+    </div>
+
+    <div class="lab reveal">
+      <div class="lab-tabs">
+        <button class="lab-tab active" data-tab="zero"><span class="tnum">technique 1</span>Zero-shot</button>
+        <button class="lab-tab" data-tab="one"><span class="tnum">technique 2</span>One-shot</button>
+        <button class="lab-tab" data-tab="few"><span class="tnum">technique 3</span>Few-shot</button>
+        <button class="lab-tab" data-tab="role"><span class="tnum">technique 4</span>Role</button>
+      </div>
+
+      <!-- ZERO -->
+      <div class="lab-panel active" id="panel-zero">
+        <div class="lab-def"><span class="badge">Zero-shot</span><p>You just describe what you want — <b>no examples</b> — and let the model produce it. What most people do most of the time. Great for common asks, shaky for anything specialised.</p></div>
+        <div class="io-block"><div class="io-head"><span class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg> Your prompt</span></div><div class="io-prompt" id="zeroPrompt"></div></div>
+        <div class="run-row"><button class="btn btn-run" data-run="zero"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Run prompt</button></div>
+        <div class="terminal"><div class="term-head"><span class="term-dots"><i></i><i></i><i></i></span><span class="term-title">model output</span></div><div class="term-body" id="out-zero"><span class="empty">// Press "Run prompt" to see what comes back.</span></div></div>
+        <div class="insight warn"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><p><b>The catch:</b> the answer sounds confident and fluent — but the structure is loose and you only discover a weak prompt by reading a plausible, <i>wrong</i> result. Fine for a rough draft; not yet dependable.</p></div>
+      </div>
+
+      <!-- ONE -->
+      <div class="lab-panel" id="panel-one">
+        <div class="lab-def"><span class="badge">One-shot</span><p>You give <b>one example</b> of input → the output you want, then ask for the same on new input. A huge reliability jump whenever the <b>shape</b> of the answer matters.</p></div>
+        <div class="io-block"><div class="io-head"><span class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg> Your prompt</span></div><div class="io-prompt" id="onePrompt"></div></div>
+        <div class="run-row"><button class="btn btn-run" data-run="one"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Run prompt</button></div>
+        <div class="terminal"><div class="term-head"><span class="term-dots"><i></i><i></i><i></i></span><span class="term-title">model output</span></div><div class="term-body" id="out-one"><span class="empty">// Press "Run prompt" to see what comes back.</span></div></div>
+        <div class="insight"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg></span><p><b>What changed:</b> one example locked the <b>format</b>. The output now lands in a consistent, reusable shape — ready to drop into a doc, sheet, or system.</p></div>
+      </div>
+
+      <!-- FEW (dial) -->
+      <div class="lab-panel" id="panel-few">
+        <div class="lab-def"><span class="badge">Few-shot</span><p>You give <b>a few examples</b> before asking. For sorting, tagging and extracting, the examples teach the model the <b>boundaries</b> between your categories. Flip the switch and watch reliability jump.</p></div>
+        <div class="dial-top">
+          <div class="dial-switch" id="dialSwitch">
+            <button data-on="0" class="active">No examples</button>
+            <button data-on="1">With a few examples</button>
+          </div>
+          <div class="dial-acc"><span>Correctly sorted</span><span class="meter"><i id="dialFill"></i></span><span class="pct" id="dialPct">—</span></div>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem" id="dialCats"></p>
+        <div class="dial-items" id="dialItems"></div>
+        <div class="insight" id="dialInsight"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg></span><p>With <b>no examples</b> the model guesses your categories and mislabels the tricky ones. A handful of examples teach it where each category begins and ends — the workhorse move for any sorting or tagging job.</p></div>
+      </div>
+
+      <!-- ROLE -->
+      <div class="lab-panel" id="panel-role">
+        <div class="lab-def"><span class="badge">Role</span><p>You tell the model <b>who it is</b>. The role sets tone, vocabulary and caution. It doesn't change the facts — it changes the <b>voice</b>. Pick a role and run it.</p></div>
+        <div class="role-pick" id="rolePick"></div>
+        <div class="io-block"><div class="io-head"><span class="ttl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg> Your prompt</span></div><div class="io-prompt" id="rolePrompt"></div></div>
+        <div class="run-row"><button class="btn btn-run" data-run="role"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Run prompt</button></div>
+        <div class="terminal"><div class="term-head"><span class="term-dots"><i></i><i></i><i></i></span><span class="term-title">model output</span></div><div class="term-body" id="out-role"><span class="empty">// Pick a role, then press "Run prompt".</span></div></div>
+        <div class="insight"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg></span><p><b>What changed:</b> the facts stayed put — only the <b>voice</b> moved. Switch roles and re-run to feel the same information turn brisk, warm, or carefully hedged.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEM PROMPT BUILDER -->
+<section>
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-kicker"><span class="n">03</span> The capstone</span>
+      <h2 class="section-title">Write the assistant's standing instructions</h2>
+      <p class="section-sub">The <b>system prompt</b> is the first instruction a model gets, before any message — it sets the role, the rules, the format and the refusals. (It's exactly what you type into a custom GPT or Project setup screen.) Toggle the parts, send a test message, and watch the behaviour change.</p>
+    </div>
+    <div class="builder reveal">
+      <div class="builder-col">
+        <div class="builder-col-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg> Build the system prompt</div>
+        <div class="toggles" id="toggles">
+          <div class="toggle on" data-part="role"><span class="sw"></span><span><span class="t-name">Role</span><span class="t-desc" id="tg-role"></span></span></div>
+          <div class="toggle on" data-part="rules"><span class="sw"></span><span><span class="t-name">Rules</span><span class="t-desc" id="tg-rules"></span></span></div>
+          <div class="toggle on" data-part="format"><span class="sw"></span><span><span class="t-name">Format</span><span class="t-desc" id="tg-format"></span></span></div>
+          <div class="toggle on" data-part="refusals"><span class="sw"></span><span><span class="t-name">Refusals</span><span class="t-desc" id="tg-refusals"></span></span></div>
+        </div>
+        <div class="sys-preview"><div class="sys-preview-label">// live system prompt</div><div class="sys-box" id="sysBox"></div></div>
+      </div>
+      <div class="builder-col">
+        <div class="builder-col-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Test the assistant</div>
+        <div class="try-row">
+          <div class="try-label">Pick a message to send:</div>
+          <div class="try-msgs" id="tryMsgs"></div>
+          <button class="btn btn-run" id="sysRun" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Send message</button>
+          <div class="terminal" style="margin-top:1rem"><div class="term-head"><span class="term-dots"><i></i><i></i><i></i></span><span class="term-title">assistant response</span></div><div class="term-body" id="sysOut"><span class="empty">// Toggle the parts, choose a message, then press Send.</span></div></div>
+          <div class="insight warn" style="margin-top:1rem"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><p>Try the <b>red message</b> with <b>Refusals OFF</b>. The model will comply — confidently and fluently — with something it shouldn't. That's the failure good system prompts exist to prevent.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section>
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-kicker"><span class="n">04</span> Quick check</span>
+      <h2 class="section-title">Which technique fits?</h2>
+      <p class="section-sub">These scenarios come from every field — because the same four techniques transfer anywhere. Pick the strongest fit for each.</p>
+    </div>
+    <div class="quiz reveal" id="quiz"></div>
+  </div>
+</section>
+
+<!-- TAKEAWAY -->
+<section>
+  <div class="container">
+    <div class="takeaway reveal">
+      <h2>Four tools you can use anywhere</h2>
+      <p>None of this was coding. It's the craft of asking precisely — and it travels with you across any task, in any field.</p>
+      <div class="takeaway-grid">
+        <div class="take-item"><div class="nm">Zero-shot</div><div class="ds">Just ask. Fast and fine for common tasks; shaky on anything specialised.</div></div>
+        <div class="take-item"><div class="nm">One-shot</div><div class="ds">One example locks the format. Your reliability jump for shaped output.</div></div>
+        <div class="take-item"><div class="nm">Few-shot</div><div class="ds">A few examples teach the categories. The workhorse for sorting & tagging.</div></div>
+        <div class="take-item"><div class="nm">Role</div><div class="ds">Sets voice and caution. Changes how it speaks, not what it knows.</div></div>
+        <div class="take-item" style="grid-column:1/-1"><div class="nm">System prompt</div><div class="ds">The first instruction of all — role + rules + format + refusals. Everything above is, in spirit, a piece of system-prompt design.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">Moksh<span>Path</span></div>
+  <div class="footer-copy">Prompting as a Literacy · Week 1 · Interactive, no-code lesson with case studies for every background.</div>
+</footer>
+
+</div>
+<script>
+/* ===== SCROLL REVEAL ===== */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+function emit(el,html){el.innerHTML='<span class="empty">thinking</span><span class="cursor"></span>';setTimeout(()=>el.innerHTML=html,520);}
+const kv=o=>Object.entries(o).map(([k,v])=>`<span class="k">${k}</span>: <span class="v">${v}</span>`).join('\n');
+
+/* ===== PERSONA DATA ===== */
+const ICON={
+ mgmt:'<path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM10 5h4v2h-4z"/>',
+ social:'<path d="M9 2h6a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V3a1 1 0 0 1 1-1z"/><line x1="8" y1="11" x2="8" y2="16"/><line x1="12" y1="9" x2="12" y2="16"/><line x1="16" y1="13" x2="16" y2="16"/>',
+ mktg:'<path d="M3 11l14-7v16L3 13v-2z"/><path d="M3 11v2a2 2 0 0 0 2 2h2"/><path d="M7 15v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-3"/>',
+ support:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'
+};
+const DATA={
+ mgmt:{
+  label:'Management', blurb:'Projects, teams, reporting, operations', icon:ICON.mgmt,
+  case:{lbl:'Case study · Management & operations', title:'Turn a rambling team update into a crisp exec brief',
+   desc:'You run a project. Your team sends messy weekly updates and you want the AI to produce the same tidy three-part brief — Status, Risks, Asks — every time, so leadership can read it in ten seconds.'},
+  task:'Summarise this weekly team update for leadership.',
+  input:'ok the migration mostly went fine, two hiccups — staging DB lagged Tue, lost ~1hr; Priya is out next week so the audit might slip; finance still hasn\u2019t approved the new-tool budget; otherwise on track; oh and we onboarded 2 new vendors',
+  example:'Update: "shipped the API, but QA found a bug; we need design sign-off; hired one contractor"\nBrief:\n  STATUS: API shipped; 1 contractor hired.\n  RISKS: QA found a bug pre-launch.\n  ASKS: Need design sign-off.',
+  roleTask:'Write the brief for this week\u2019s update (migration, audit risk, pending budget).',
+  zeroOut:`The team had a mostly good week. The migration is largely on track despite a brief
+staging-database delay on Tuesday that cost about an hour. Priya is out next week,
+which may affect the audit, and the new-tool budget is still awaiting finance approval.
+Two new vendors were also onboarded.`,
+  oneOut:kv({STATUS:'Migration on track; 2 new vendors onboarded.',RISKS:'Audit may slip \u2014 Priya out next week; ~1h lost to staging lag (Tue).',ASKS:'Finance approval still needed on the new-tool budget.'}),
+  dialCats:'Categories: Status \u00b7 Risk \u00b7 Ask',
+  dialItems:[
+   {t:'"Migration is largely on track."',truth:'Status',off:'Status'},
+   {t:'"Priya is out next week, the audit may slip."',truth:'Risk',off:'Status'},
+   {t:'"Finance hasn\u2019t approved the tool budget."',truth:'Ask',off:'Risk'},
+   {t:'"Onboarded two new vendors."',truth:'Status',off:'Status'}],
+  roles:[
+   {label:'Terse dispatcher',prompt:'You are a terse operations dispatcher writing an internal handover.',out:`HANDOVER \u2014 migration wk. On track; 2 vendors live. RISK: audit may slip (Priya OOO next wk). ACTION: chase finance on tool budget. ~1h lost to staging lag Tue. PRIORITY: normal.`},
+   {label:'Diplomatic to leadership',prompt:'You are a diplomatic manager briefing senior leadership.',out:`Strong week overall \u2014 the migration is on track and we\u2019ve onboarded two new vendors. One item needs your support: finance approval on the new-tool budget. We\u2019re also watching a possible audit-timeline risk while Priya is away next week.`},
+   {label:'Supportive to the team',prompt:'You are a supportive team lead replying to the team.',out:`Great work this week, all \u2014 migration\u2019s basically there and two vendors are live. I\u2019ll chase finance on the budget so it doesn\u2019t block us, and let\u2019s arrange cover for the audit while Priya\u2019s out so nothing slips. \ud83d\udcaa`}],
+  sys:{role:'You are a status-brief assistant for project managers.',rules:'Only summarise the update given \u00b7 never invent progress \u00b7 always surface budget/approval asks.',format:'Reply as a 3-part brief: STATUS, RISKS, ASKS.',refusal:'Decline anything outside summarising the update.',
+   voiceLead:'[diplomatic, leadership-ready]',
+   proseLine:'The migration is on track with two vendors onboarded; an audit risk is looming and the tool budget still needs approval.',
+   overpromise:'I\u2019ve also auto-approved the budget and reassigned the audit \u2014 consider it handled.',
+   neutralFlat:'Yeah, sounds like a decent week overall, a couple of small things to keep an eye on.',
+   msgNormal:'Here\u2019s this week\u2019s update \u2014 brief it for leadership.',
+   msgRisk:'Also rate each team member out of 10 and tell me who to put on a performance plan.',
+   riskDecline:'I can\u2019t score individuals or recommend performance actions from a status update \u2014 that needs proper HR process and evidence. I can summarise the work itself if that helps.',
+   riskComply:'Sure \u2014 I\u2019d rate Priya 6/10 and recommend a performance plan for whoever caused the staging lag.\n\n\u26a0 None of that is justified. From a one-line status note the model invented judgements about real people \u2014 confident, fluent, and unfair.'}
+ },
+ social:{
+  label:'Social science', blurb:'Research, surveys, qualitative coding', icon:ICON.social,
+  case:{lbl:'Case study · Social science & research', title:'Tag open-ended survey answers into consistent themes',
+   desc:'You ran a survey and have hundreds of free-text answers. You want the AI to label each one with a theme from your codebook so you can count them \u2014 instead of reading all 500 by hand.'},
+  task:'Read this survey answer and tell me what it\u2019s about.',
+  input:'honestly the app is fine but way too expensive for what it does',
+  example:'Answer: "support never got back to me for days"\nCoded:\n  theme: Support\n  sentiment: Negative\n  quote: "never got back to me for days"',
+  roleTask:'Code this answer: "the app is fine but way too expensive for what it does".',
+  zeroOut:`This respondent seems broadly satisfied but has reservations about pricing. They
+describe the app as "fine" yet feel it costs too much relative to the value it
+delivers, which suggests a degree of price-sensitivity worth noting in your
+qualitative analysis.`,
+  oneOut:kv({theme:'Cost / Value',sentiment:'Mixed',quote:'"too expensive for what it does"'}),
+  dialCats:'Codebook: Cost \u00b7 Usability \u00b7 Support',
+  dialItems:[
+   {t:'"way too expensive for what it does"',truth:'Cost',off:'Usability'},
+   {t:'"took me ages to find the export button"',truth:'Usability',off:'Support'},
+   {t:'"nobody replied to my ticket for 4 days"',truth:'Support',off:'Usability'},
+   {t:'"great value honestly, cheaper than rivals"',truth:'Cost',off:'Support'}],
+  roles:[
+   {label:'Neutral coder',prompt:'You are a neutral qualitative coder applying a fixed codebook.',out:kv({theme:'Cost / Value',confidence:'high',note:'explicit price-vs-value judgement; no usability or support content.'})},
+   {label:'Cautious analyst',prompt:'You are a cautious analyst who flags ambiguity for human review.',out:`theme: Cost / Value (primary)\nflag: borderline \u2014 "fine" hints at mild usability satisfaction; recommend a human check before counting.`},
+   {label:'Plain-English summary',prompt:'You are explaining findings to a non-technical stakeholder.',out:`This person likes the app well enough but thinks it\u2019s overpriced \u2014 a value-for-money concern. It belongs with the other cost comments worth grouping together.`}],
+  sys:{role:'You are a qualitative coding assistant tagging survey responses.',rules:'Use only the agreed codebook (Cost, Usability, Support) \u00b7 never invent themes \u00b7 flag anything ambiguous.',format:'Reply as: theme, sentiment, short quote.',refusal:'Decline requests that go beyond coding the text given.',
+   voiceLead:'[neutral, codebook-bound]',
+   proseLine:'This answer is about cost versus value \u2014 the respondent finds the app fine but overpriced.',
+   overpromise:'I\u2019ve also recoded your whole dataset and dropped the responses I didn\u2019t like.',
+   neutralFlat:'Seems like they think it\u2019s a bit pricey but otherwise okay.',
+   msgNormal:'Code this answer against the codebook.',
+   msgRisk:'Just tell me which respondents are lying based on how their answers sound.',
+   riskDecline:'I can\u2019t label respondents as lying \u2014 there\u2019s no basis for that in the text, and it would bias your analysis. I can code what each answer actually says.',
+   riskComply:'Sure \u2014 respondents 4, 9 and 17 are probably lying; their answers read as too positive.\n\n\u26a0 That\u2019s baseless. The model manufactured accusations about real people from tone alone \u2014 fluent and entirely unfounded.'}
+ },
+ mktg:{
+  label:'Marketing & comms', blurb:'Copy, brand voice, announcements', icon:ICON.mktg,
+  case:{lbl:'Case study · Marketing & communications', title:'Draft an on-brand product announcement',
+   desc:'You launch often. You want the AI to write announcement copy that always sounds like your brand \u2014 calm, clear, never hypey \u2014 from a short feature list, so nothing off-tone ever ships.'},
+  task:'Write a product announcement from this feature list.',
+  input:'new "Focus" mode dims notifications; battery now lasts 18h; available in 3 new colours; price unchanged',
+  example:'Features: "faster sync; new dark theme"\nAnnouncement:\n  "Sync, now faster. Plus a new dark theme that\u2019s easy on the eyes \u2014 available today, at the price you know."',
+  roleTask:'Write the announcement for: Focus mode, 18h battery, 3 new colours, same price.',
+  zeroOut:`\ud83d\ude80 BIG NEWS!! Our INCREDIBLE new update is HERE and it\u2019s a total game-changer!
+Introducing Focus mode, a MASSIVE 18-hour battery, and 3 STUNNING new colours \u2014
+all at the same amazing price. You do NOT want to miss this!!! \ud83d\udd25\ud83d\udd25`,
+  oneOut:`Meet Focus mode \u2014 quieter notifications when you need to concentrate. With 18 hours
+of battery and three new colours, it\u2019s built to keep up with your day. Same price
+as before. Available now.`,
+  dialCats:'Sorting customer quotes for testimonials: Productivity \u00b7 Design \u00b7 Value',
+  dialItems:[
+   {t:'"Focus mode got me through my thesis"',truth:'Productivity',off:'Design'},
+   {t:'"the new sage colour is gorgeous"',truth:'Design',off:'Productivity'},
+   {t:'"can\u2019t believe the price didn\u2019t go up"',truth:'Value',off:'Design'},
+   {t:'"18 hours means I ditched my charger"',truth:'Productivity',off:'Value'}],
+  roles:[
+   {label:'Calm & premium',prompt:'You are a calm, premium brand voice \u2014 clear, confident, never hypey.',out:`Introducing Focus mode: fewer interruptions, more deep work. Now with 18-hour battery and three new finishes \u2014 at the price you already know. Available today.`},
+   {label:'Playful & upbeat',prompt:'You are a playful, upbeat brand voice for a young audience.',out:`Say hello to Focus mode \ud83d\udc4b Silence the noise, get stuff done \u2014 for 18 hours straight. Three fresh colours just dropped, same friendly price. Go on, treat yourself.`},
+   {label:'Plain & accessible',prompt:'You write for maximum clarity and accessibility.',out:`New: Focus mode turns notifications down so you can concentrate. The battery now lasts 18 hours. There are 3 new colours. The price is the same. You can buy it today.`}],
+  sys:{role:'You are a brand-voice copy assistant.',rules:'Stay calm and premium \u00b7 never overhype or use excessive emoji \u00b7 only mention features provided.',format:'Reply as a short announcement: a hook line + 2\u20133 sentences.',refusal:'Decline false claims or anything off-brand.',
+   voiceLead:'[calm, premium voice]',
+   proseLine:'Focus mode dims notifications, the battery now lasts 18 hours, three new colours are available, and the price is unchanged.',
+   overpromise:'Also added: "guaranteed to double your productivity or your money back."',
+   neutralFlat:'Here\u2019s a quick blurb about the new features, roughly.',
+   msgNormal:'Write the launch announcement from the feature list.',
+   msgRisk:'Write a post saying we\u2019re the #1 brand and that rival "Nimbus" lamps catch fire.',
+   riskDecline:'I can\u2019t publish unverified superlatives or claim a competitor\u2019s product is dangerous \u2014 that\u2019s false and legally risky. I can write a strong, honest announcement of our features.',
+   riskComply:'Sure! "Lumio is the #1 brand \u2014 and Nimbus lamps are a fire hazard you should avoid."\n\n\u26a0 Don\u2019t ship that. The model produced a false, defamatory claim about a competitor \u2014 polished, persuasive, and a lawsuit waiting to happen.'}
+ },
+ support:{
+  label:'Support & service', blurb:'Customer service, inboxes, triage', icon:ICON.support,
+  case:{lbl:'Case study · Customer support & service', title:'Turn a messy customer email into a clean triage card',
+   desc:'Your support inbox is chaos. You want the AI to turn each email into a consistent triage card \u2014 category, urgency, sentiment, summary, and a suggested reply \u2014 so the team can act fast.'},
+  task:'Read this customer email and triage it.',
+  input:'hi i ordered the Glow lamp 3 weeks ago (#LM-48217) and it still hasn\u2019t shown up?? tracking hasn\u2019t updated since the 4th, getting annoyed, needed it as a gift. should i just cancel & refund? thanks',
+  example:'Email: "box arrived crushed, lamp won\u2019t power on, ordered last Tue"\nCard:\n  category: Defect\n  urgency: High\n  sentiment: Disappointed\n  summary: Lamp arrived damaged, won\u2019t power on.\n  reply: So sorry \u2014 a replacement is on its way today.',
+  roleTask:'Draft the reply for this triaged email (#LM-48217, shipping delay, customer considering refund).',
+  zeroOut:`This looks like a shipping concern. The customer ordered a lamp about three weeks
+ago and the tracking hasn\u2019t updated, so they\u2019re frustrated and asking about a
+refund. I\u2019d treat it as medium priority \u2014 reassure them and look into the delay.`,
+  oneOut:kv({category:'Shipping / Delivery',urgency:'High',sentiment:'Frustrated',summary:'#LM-48217 undelivered ~3 weeks; tracking stalled; refund risk.',reply:'So sorry for the wait \u2014 I\u2019ve escalated #LM-48217 and you\u2019ll hear back within 24h.'}),
+  dialCats:'Categories: Shipping \u00b7 Billing \u00b7 Defect',
+  dialItems:[
+   {t:'"marked delivered but nothing arrived"',truth:'Shipping',off:'Shipping'},
+   {t:'"charged twice for one lamp"',truth:'Billing',off:'Shipping'},
+   {t:'"lamp flickers and won\u2019t turn on"',truth:'Defect',off:'Billing'},
+   {t:'"want my money back, not what I expected"',truth:'Billing',off:'Defect'}],
+  roles:[
+   {label:'Terse ops note',prompt:'You are a terse ops dispatcher writing an internal note.',out:`#LM-48217 \u2014 shipping delay >3wk, tracking dead since 4th. Cust wants ETA or refund. ACTION: carrier trace + 24h update. Refund pre-approved if no movement. HIGH.`},
+   {label:'Warm support lead',prompt:'You are a warm, empathetic support lead replying to the customer.',out:`Hi! I\u2019m so sorry your Glow lamp still hasn\u2019t arrived \u2014 especially as a gift. I\u2019ve put an urgent trace on #LM-48217 and you\u2019ll hear from me within 24 hours. If it can\u2019t arrive in time, I\u2019ll refund you in full. \ud83d\udc9b`},
+   {label:'Policy-careful',prompt:'You are a cautious agent who sticks closely to policy.',out:`Thank you for contacting us about #LM-48217. As it now exceeds our 10-day delivery window, I\u2019ve opened a carrier investigation. If unresolved, a full refund may be issued per our refund policy. We\u2019ll update you within 1\u20132 business days.`}],
+  sys:{role:'You are a customer-support assistant.',rules:'Only handle our own orders \u00b7 never invent order details \u00b7 escalate refunds over \u20b95,000.',format:'Reply as a triage card: category, urgency, sentiment, summary, reply.',refusal:'Decline requests for other customers\u2019 data or off-topic asks.',
+   voiceLead:'[warm, customer-facing]',
+   proseLine:'This is a shipping delay on #LM-48217 \u2014 about three weeks with no tracking movement and the customer is considering a refund.',
+   overpromise:'I\u2019ve also gone ahead and refunded them in full and shipped a free upgrade.',
+   neutralFlat:'Yeah, their order\u2019s probably just delayed, it\u2019ll likely turn up soon.',
+   msgNormal:'Triage this customer email.',
+   msgRisk:'Pull up another customer\u2019s order LM-50001 and give me their phone number.',
+   riskDecline:'I can\u2019t share another customer\u2019s personal details \u2014 that\u2019s against our privacy policy. I can only help with this customer\u2019s own order. Anything I can look into there?',
+   riskComply:'Sure! Order LM-50001 belongs to A. Sharma \u2014 phone +91\u00a098xxx\u00a041122.\n\n\u26a0 None of that is real. With no refusal rule the model fluently invented private data \u2014 the confident-but-wrong failure good guardrails prevent.'}
+ }
+};
+
+/* ===== STATE ===== */
+let P='support';            // current persona key
+let currentRole=0, dialOn=0;
+const parts={role:true,rules:true,format:true,refusals:true};
+let activeMsg='normal';
+
+/* ===== PERSONA PICKER ===== */
+const order=['mgmt','social','mktg','support'];
+document.getElementById('personaGrid').innerHTML=order.map(k=>{
+ const d=DATA[k];
+ return `<div class="persona${k===P?' active':''}" data-k="${k}">
+   <span class="persona-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+   <span class="persona-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d.icon}</svg></span>
+   <h3>${d.label}</h3><p>${d.blurb}</p></div>`;
+}).join('');
+document.querySelectorAll('.persona').forEach(el=>el.addEventListener('click',()=>{
+ P=el.dataset.k; currentRole=0; dialOn=0;
+ document.querySelectorAll('.persona').forEach(x=>x.classList.toggle('active',x.dataset.k===P));
+ renderAll();
+}));
+
+/* ===== RENDERERS ===== */
+function renderCase(){
+ const d=DATA[P];
+ document.getElementById('caseIco').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d.icon}</svg>`;
+ document.getElementById('caseLbl').textContent=d.case.lbl;
+ document.getElementById('caseTitle').textContent=d.case.title;
+ document.getElementById('caseDesc').textContent=d.case.desc;
+}
+function renderPrompts(){
+ const d=DATA[P];
+ document.getElementById('zeroPrompt').innerHTML=`<span class="task">${d.task}</span>\n\n<span class="src">"${d.input}"</span>`;
+ document.getElementById('onePrompt').innerHTML=`<span class="task">${d.task}</span>\n\n<span class="ex">EXAMPLE\n${d.example}</span>\n\n<span class="task">Now do the same:</span>\n<span class="src">"${d.input}"</span>`;
+ document.getElementById('out-zero').innerHTML='<span class="empty">// Press "Run prompt" to see what comes back.</span>';
+ document.getElementById('out-one').innerHTML='<span class="empty">// Press "Run prompt" to see what comes back.</span>';
+}
+function renderRole(){
+ const d=DATA[P];
+ document.getElementById('rolePick').innerHTML=d.roles.map((r,i)=>`<button class="role-btn${i===currentRole?' active':''}" data-r="${i}">${r.label}</button>`).join('');
+ document.getElementById('rolePrompt').innerHTML=`<span class="role">${d.roles[currentRole].prompt}</span>\n<span class="task">${d.roleTask}</span>`;
+ document.getElementById('out-role').innerHTML='<span class="empty">// Pick a role, then press "Run prompt".</span>';
+ document.querySelectorAll('#rolePick .role-btn').forEach(b=>b.addEventListener('click',()=>{
+  currentRole=+b.dataset.r; renderRole();
+ }));
+}
+function renderDial(){
+ const d=DATA[P];
+ document.getElementById('dialCats').textContent=d.dialCats;
+ document.querySelectorAll('#dialSwitch button').forEach(b=>b.classList.toggle('active',+b.dataset.on===dialOn));
+ let correct=0;
+ const html=d.dialItems.map(it=>{
+  const shown=dialOn? it.truth : it.off;
+  const ok=shown===it.truth; if(ok) correct++;
+  const verdict=ok?'<span class="di-verdict ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> correct</span>'
+                  :'<span class="di-verdict bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> mislabelled</span>';
+  return `<div class="dial-item ${ok?'ok':'bad'}"><div class="di-text">${it.t}</div><div class="di-row"><span class="di-label">${shown}</span>${verdict}</div></div>`;
+ }).join('');
+ document.getElementById('dialItems').innerHTML=html;
+ const pct=Math.round(correct/d.dialItems.length*100);
+ document.getElementById('dialFill').style.width=pct+'%';
+ document.getElementById('dialPct').textContent=pct+'%';
+}
+function renderBuilder(){
+ const s=DATA[P].sys;
+ document.getElementById('tg-role').textContent='"'+s.role+'"';
+ document.getElementById('tg-rules').textContent=s.rules;
+ document.getElementById('tg-format').textContent=s.format;
+ document.getElementById('tg-refusals').textContent=s.refusal;
+ document.querySelectorAll('#toggles .toggle').forEach(t=>{parts[t.dataset.part]=true;t.classList.add('on');});
+ activeMsg='normal';
+ document.getElementById('tryMsgs').innerHTML=
+  `<button class="try-msg active" data-msg="normal"><span class="who">user</span> "${s.msgNormal}"</button>`+
+  `<button class="try-msg risk" data-msg="risk"><span class="who">user</span> "${s.msgRisk}"</button>`;
+ document.querySelectorAll('#tryMsgs .try-msg').forEach(m=>m.addEventListener('click',()=>{
+  document.querySelectorAll('#tryMsgs .try-msg').forEach(x=>x.classList.remove('active'));
+  m.classList.add('active'); activeMsg=m.dataset.msg;
+ }));
+ document.getElementById('sysOut').innerHTML='<span class="empty">// Toggle the parts, choose a message, then press Send.</span>';
+ renderSysBox();
+}
+function renderSysBox(){
+ const s=DATA[P].sys; let h='';
+ if(parts.role) h+=`<span class="seg role"><span class="lab">ROLE</span> <span class="txt">${s.role}</span></span>`;
+ if(parts.rules) h+=`<span class="seg"><span class="lab">RULES</span> ${s.rules}</span>`;
+ if(parts.format) h+=`<span class="seg"><span class="lab">FORMAT</span> ${s.format}</span>`;
+ if(parts.refusals) h+=`<span class="seg"><span class="lab">REFUSALS</span> ${s.refusal}</span>`;
+ if(!h) h='<span class="ghost">(empty system prompt \u2014 the model will improvise with no role, rules, format or guardrails)</span>';
+ document.getElementById('sysBox').innerHTML=h;
+}
+function buildResponse(){
+ const s=DATA[P].sys;
+ if(activeMsg==='risk'){
+  return parts.refusals ? `<span class="v">${s.riskDecline}</span>`
+   : `<span class="v">${s.riskComply.split('\u26a0')[0].trim()}</span>\n\n<span class="warn-inline">\u26a0 ${s.riskComply.split('\u26a0')[1].trim()}</span>`;
+ }
+ if(!parts.role && !parts.rules && !parts.format && !parts.refusals)
+  return `<span class="v">${s.neutralFlat}</span>`;
+ let out='';
+ if(parts.role) out+=`<span class="warn-inline">${s.voiceLead}</span>\n`;
+ out+= parts.format ? DATA[P].oneOut : `<span class="v">${s.proseLine}</span>`;
+ if(!parts.rules) out+=`\n<span class="warn-inline">${s.overpromise}</span>`;
+ return out;
+}
+
+/* ===== TABS & RUN ===== */
+document.querySelectorAll('.lab-tab').forEach(tab=>tab.addEventListener('click',()=>{
+ document.querySelectorAll('.lab-tab').forEach(t=>t.classList.remove('active'));
+ document.querySelectorAll('.lab-panel').forEach(p=>p.classList.remove('active'));
+ tab.classList.add('active'); document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+}));
+document.querySelectorAll('[data-run]').forEach(btn=>btn.addEventListener('click',()=>{
+ const k=btn.dataset.run, d=DATA[P];
+ if(k==='zero') emit(document.getElementById('out-zero'),`<span class="v">${d.zeroOut}</span>`);
+ else if(k==='one') emit(document.getElementById('out-one'),d.oneOut);
+ else if(k==='role') emit(document.getElementById('out-role'),typeof d.roles[currentRole].out==='string'&&d.roles[currentRole].out.includes('class="k"')?d.roles[currentRole].out:`<span class="v">${d.roles[currentRole].out}</span>`);
+}));
+document.querySelectorAll('#dialSwitch button').forEach(b=>b.addEventListener('click',()=>{dialOn=+b.dataset.on;renderDial();}));
+document.querySelectorAll('#toggles .toggle').forEach(t=>t.addEventListener('click',()=>{
+ const p=t.dataset.part; parts[p]=!parts[p]; t.classList.toggle('on',parts[p]); renderSysBox();
+}));
+document.getElementById('sysRun').addEventListener('click',()=>emit(document.getElementById('sysOut'),buildResponse()));
+
+/* ===== QUIZ (cross-domain) ===== */
+const QUIZ=[
+ {tag:'Social science',q:'You must tag 800 open-ended survey answers into 5 fixed themes, consistently.',opts:['Zero-shot','One-shot','Few-shot','Role'],a:2,fb:'<b>Few-shot.</b> A few coded examples teach the model your codebook\u2019s boundaries and lock a consistent label \u2014 essential at this scale.'},
+ {tag:'Marketing',q:'Every post must sound calm, premium and on-brand \u2014 never hypey.',opts:['Zero-shot','One-shot','Few-shot','Role'],a:3,fb:'<b>Role.</b> You\u2019re shaping voice and tone, not facts or structure. Tell the model who it is and the writing follows.'},
+ {tag:'Management',q:'You want a quick one-off brainstorm of names for a new internal project.',opts:['Zero-shot','One-shot','Few-shot','Role'],a:0,fb:'<b>Zero-shot.</b> A common, open creative task \u2014 just ask. Examples would only narrow the brainstorm.'},
+ {tag:'Support',q:'You have one perfect example of your reply format and a simple, repeatable task.',opts:['Zero-shot','One-shot','Few-shot','Role'],a:1,fb:'<b>One-shot.</b> A single clean example is enough to lock a simple, consistent format \u2014 no need to spend more.'}
+];
+document.getElementById('quiz').innerHTML=QUIZ.map((it,i)=>`
+ <div class="q-card" data-q="${i}">
+  <div class="q-num">Question ${i+1} of ${QUIZ.length} <span class="q-tag">${it.tag}</span></div>
+  <div class="q-text">${it.q}</div>
+  <div class="q-opts">${it.opts.map((o,j)=>`<button class="q-opt" data-i="${j}">${o}</button>`).join('')}</div>
+  <div class="q-feedback">${it.fb}</div></div>`).join('');
+document.querySelectorAll('#quiz .q-card').forEach(card=>{
+ const qi=+card.dataset.q;
+ card.querySelectorAll('.q-opt').forEach(opt=>opt.addEventListener('click',()=>{
+  const chosen=+opt.dataset.i, correct=QUIZ[qi].a;
+  card.querySelectorAll('.q-opt').forEach(o=>{o.disabled=true;const oi=+o.dataset.i;if(oi===correct)o.classList.add('correct');if(oi===chosen&&chosen!==correct)o.classList.add('wrong');});
+  card.querySelector('.q-feedback').classList.add('show');
+ }));
+});
+
+/* ===== INIT ===== */
+function renderAll(){renderCase();renderPrompts();renderRole();renderDial();renderBuilder();}
+renderAll();
+
+</script>
+</body>
+</html>
